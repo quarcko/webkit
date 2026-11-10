@@ -53,6 +53,13 @@ set(QtTestBrowser_LIBRARIES
     ${STATIC_LIB_DEPENDENCIES}
 )
 
+# Qt 6.10+ private GUI headers
+if (Qt6_VERSION VERSION_GREATER_EQUAL "6.10.0")
+    list(APPEND QtTestBrowser_LIBRARIES
+        Qt6::GuiPrivate
+    )
+endif ()
+
 qt_add_resources(QtTestBrowser_SOURCES
     QtTestBrowser.qrc
 )

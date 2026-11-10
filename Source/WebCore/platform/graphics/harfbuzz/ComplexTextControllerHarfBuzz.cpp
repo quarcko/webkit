@@ -561,6 +561,26 @@ static const hb_script_t _qtscript_to_hbscript[] = {
     HB_SCRIPT_KAWI,
     HB_SCRIPT_NAG_MUNDARI,
 #endif
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+    // Unicode 16.0 additions
+    hb_script_t(HB_TAG('G','a','r','a')), // Script_Garay
+    hb_script_t(HB_TAG('G','u','k','h')), // Script_GurungKhema
+    hb_script_t(HB_TAG('K','r','a','i')), // Script_KiratRai
+    hb_script_t(HB_TAG('O','n','a','o')), // Script_OlOnal
+    hb_script_t(HB_TAG('S','u','n','u')), // Script_Sunuwar
+    hb_script_t(HB_TAG('T','o','d','r')), // Script_Todhri
+    hb_script_t(HB_TAG('T','u','t','g')), // Script_TuluTigalari
+#endif
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 11, 0)
+    // Unicode 17.0 additions
+    hb_script_t(HB_TAG('S','i','d','t')), // Script_Sidetic
+    hb_script_t(HB_TAG('T','a','y','o')), // Script_TaiYo
+    hb_script_t(HB_TAG('T','o','l','s')), // Script_TolongSiki
+    hb_script_t(HB_TAG('B','e','r','f')), // Script_BeriaErfe
+#endif
+
 };
 static_assert(QChar::ScriptCount == sizeof(_qtscript_to_hbscript) / sizeof(_qtscript_to_hbscript[0]));
 

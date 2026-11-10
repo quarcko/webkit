@@ -77,8 +77,17 @@ macro(CHECK_Qt6_PRIVATE_INCLUDE_DIRS _qt_component _header)
         int main() { return 0; }
     "
     )
-    set(CMAKE_REQUIRED_INCLUDES ${Qt6${_qt_component}_PRIVATE_INCLUDE_DIRS})
-    set(CMAKE_REQUIRED_LIBRARIES Qt6::${_qt_component})
+    # Since Qt 6.10, private modules are separate CMake packages. Use their
+    # imported targets to propagate the correct versioned include directories.
+    # Retain the Qt 6.5-style include variables for older Qt releases.
+    if (Qt6_VERSION VERSION_GREATER_EQUAL "6.10.0")
+        set(CMAKE_REQUIRED_LIBRARIES
+            Qt6::${_qt_component}
+            Qt6::${_qt_component}Private)
+    else ()
+        set(CMAKE_REQUIRED_INCLUDES ${Qt6${_qt_component}_PRIVATE_INCLUDE_DIRS})
+        set(CMAKE_REQUIRED_LIBRARIES Qt6::${_qt_component})
+    endif ()
 
     # Avoid check_include_file_cxx() because it performs linking but doesn't support CMAKE_REQUIRED_LIBRARIES (doh!)
     check_cxx_source_compiles("${INCLUDE_TEST_SOURCE}" Qt6${_qt_component}_PRIVATE_HEADER_FOUND)
@@ -597,7 +606,18 @@ endif ()
 
 find_package(Qt6 ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 
+# In Qt 6.10+ private CMake modules must be found explicitly.
+if (Qt6_VERSION VERSION_GREATER_EQUAL "6.10.0")
+    set(QT_REQUIRED_PRIVATE_COMPONENTS GuiPrivate NetworkPrivate)
+    if (ENABLE_WEBKIT)
+        list(APPEND QT_REQUIRED_PRIVATE_COMPONENTS QuickPrivate)
+    endif ()
+    find_package(Qt6 ${REQUIRED_QT_VERSION} REQUIRED
+        COMPONENTS ${QT_REQUIRED_PRIVATE_COMPONENTS})
+endif ()
+
 CHECK_Qt6_PRIVATE_INCLUDE_DIRS(Gui private/qhexstring_p.h)
+CHECK_Qt6_PRIVATE_INCLUDE_DIRS(Gui private/qrawfont_p.h)
 if (Qt6_VERSION VERSION_GREATER 5.10.1)
     CHECK_Qt6_PRIVATE_INCLUDE_DIRS(Network private/http2protocol_p.h)
 endif ()

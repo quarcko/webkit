@@ -49,6 +49,9 @@
 #include <QDebug>
 #include <QMetaObject>
 #include <QMetaType>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+#include <QtCore/qtmochelpers.h>
+#endif
 #include <QObject>
 #include <QStringList>
 #include <QVarLengthArray>
@@ -1519,6 +1522,7 @@ QtConnectionObject::~QtConnectionObject()
 }
 
 // Begin moc-generated code -- modify with care! Check "HAND EDIT" parts
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
 struct qt_meta_stringdata_QtConnectionObject_t {
     const uint offsetsAndSize[6];
     char stringdata0[44];
@@ -1559,6 +1563,7 @@ static const uint qt_meta_data_QtConnectionObject[] = {
 
        0        // eod
 };
+#endif // Qt < 6.10 legacy metadata
 
 void QtConnectionObject::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
@@ -1571,6 +1576,55 @@ void QtConnectionObject::qt_static_metacall(QObject *_o, QMetaObject::Call _c, i
         }
     }
 }
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+
+// Qt 6.10+ meta-object metadata.
+// Preserve the custom qt_static_metacall implementation,
+// which forwards raw Qt signal arguments to execute(void **).
+
+static constexpr auto qt_connection_metaobject_content = [] {
+    namespace QMC = QtMocConstants;
+
+    QtMocHelpers::StringRefStorage strings {
+        "JSC::Bindings::QtConnectionObject",
+        "execute",
+        ""
+    };
+
+    QtMocHelpers::UintData methods {
+        QtMocHelpers::SlotData<void()>(
+            1, 2, QMC::AccessPublic, QMetaType::Void)
+    };
+
+    QtMocHelpers::UintData properties {};
+    QtMocHelpers::UintData enums {};
+
+    return QtMocHelpers::metaObjectData<QtConnectionObject, void>(
+        QMC::MetaObjectFlag{},
+        strings,
+        methods,
+        properties,
+        enums);
+}();
+
+static constexpr auto qt_connection_metaobject_static =
+    qt_connection_metaobject_content.staticData;
+
+static constexpr auto qt_connection_metaobject_relocating =
+    qt_connection_metaobject_content.relocatingData;
+
+const QMetaObject QtConnectionObject::staticMetaObject = { {
+    QMetaObject::SuperData::link<QObject::staticMetaObject>(),
+    qt_connection_metaobject_static.stringdata,
+    qt_connection_metaobject_static.data,
+    qt_static_metacall,
+    nullptr,
+    qt_connection_metaobject_relocating.metaTypes,
+    nullptr
+} };
+
+#else // Qt < 6.10
 
 //const QMetaObject QtConnectionObject::staticMetaObject = {
 //    { &QObject::staticMetaObject, qt_meta_stringdata_QtConnectionObject.data,
@@ -1589,6 +1643,7 @@ qt_incomplete_metaTypeArray<qt_meta_stringdata_QtConnectionObject_t
 >,
     nullptr
 } };
+#endif // Qt version
 
 const QMetaObject *QtConnectionObject::metaObject() const
 {
@@ -1597,9 +1652,16 @@ const QMetaObject *QtConnectionObject::metaObject() const
 
 void *QtConnectionObject::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
+    if (!_clname)
+        return nullptr;
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+    if (!strcmp(_clname, "JSC::Bindings::QtConnectionObject"))
+#else
     if (!strcmp(_clname, qt_meta_stringdata_QtConnectionObject.stringdata0))
+#endif
         return static_cast<void*>(const_cast<QtConnectionObject*>(this));
+
     return QObject::qt_metacast(_clname);
 }
 

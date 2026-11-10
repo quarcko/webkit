@@ -2461,6 +2461,16 @@ WEBKIT_FRAMEWORK_DECLARE(WebCore)
 WEBKIT_LIBRARY_DECLARE(WebCoreTestSupport)
 WEBKIT_INCLUDE_CONFIG_FILES_IF_EXISTS()
 
+# Qt 6.10+ requires explicit dependencies on private Qt modules.
+# The imported targets provide the version-specific include paths.
+if (PORT STREQUAL "Qt" AND
+    Qt6_VERSION VERSION_GREATER_EQUAL "6.10.0")
+    list(APPEND WebCore_PRIVATE_LIBRARIES
+        Qt6::GuiPrivate
+        Qt6::NetworkPrivate
+    )
+endif ()
+
 list(APPEND WebCoreTestSupport_LIBRARIES ${WebCore_LIBRARIES})
 list(APPEND WebCoreTestSupport_PRIVATE_LIBRARIES ${WebCore_PRIVATE_LIBRARIES})
 list(APPEND WebCoreTestSupport_DEPENDENCIES WebCore)

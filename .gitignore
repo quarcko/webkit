@@ -17,6 +17,8 @@ AAAAAAAA/
 build-dep-win/
 build-win/
 install-win/
+build/
+install/
 
 # Ignore Buildstream local files
 /Tools/buildstream/.bst2
