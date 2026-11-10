@@ -19,6 +19,9 @@ build-win/
 install-win/
 build/
 install/
+build-6120/
+install-6120/
+webkit-src-master.rar
 
 # Ignore Buildstream local files
 /Tools/buildstream/.bst2
