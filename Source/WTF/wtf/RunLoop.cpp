@@ -159,11 +159,22 @@ void RunLoop::dispatch(Function<void()>&& function)
 {
     RELEASE_ASSERT(function);
     bool needsWakeup = false;
-
+#if PLATFORM(QT)
+    // Captures may own timers or dispatch more work from their destructors.
+    // Never destroy a rejected function while holding m_nextIterationLock.
+    Function<void()> rejectedFunction;
+#endif
     {
         Locker locker { m_nextIterationLock };
-        needsWakeup = m_nextIteration.isEmpty();
-        m_nextIteration.append(WTFMove(function));
+#if PLATFORM(QT)
+        if (m_dispatchClosed)
+            rejectedFunction = WTFMove(function);
+        else
+#endif
+        {
+            needsWakeup = m_nextIteration.isEmpty();
+            m_nextIteration.append(WTFMove(function));
+        }
     }
 
     if (needsWakeup)
@@ -196,11 +207,39 @@ void RunLoop::suspendFunctionDispatchForCurrentCycle()
 
 void RunLoop::threadWillExit()
 {
+#if PLATFORM(QT)
+    // Called either by QThread::finished (while Qt's thread data is valid),
+    // or by the WTF TLS holder if it is destroyed first. The second call
+    // must not touch Qt: its thread-local data may already be gone.
+    Deque<Function<void()>> pendingFunctions;
+    {
+        Locker locker { m_nextIterationLock };
+        if (m_dispatchClosed)
+            return;
+        m_dispatchClosed = true;
+        pendingFunctions = std::exchange(m_nextIteration, { });
+    }
+
+    // A callback's destructor may release a reference to this RunLoop.
+    Ref<RunLoop> protectedThis { *this };
+    auto currentFunctions = std::exchange(m_currentIteration, { });
+
+    prepareForQtThreadExit();
+
+    // Discard, do not execute, application callbacks during thread exit.
+    // This also destroys JSC's deferred PerVMData timers. Qt helpers still
+    // exist here, but timer cancellation is already logically complete.
+    currentFunctions.clear();
+    pendingFunctions.clear();
+
+    completeQtThreadExit();
+#else
     m_currentIteration.clear();
     {
         Locker locker { m_nextIterationLock };
         m_nextIteration.clear();
     }
+#endif
 }
 
 } // namespace WTF

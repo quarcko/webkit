@@ -27,157 +27,295 @@
 #include "config.h"
 #include "RunLoop.h"
 
-#include <QAbstractEventDispatcher>
 #include <QCoreApplication>
-#include <QMetaMethod>
+#include <QEventLoop>
 #include <QMetaObject>
 #include <QObject>
 #include <QThread>
 #include <QTimerEvent>
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <limits>
+#include <unordered_map>
+#include <utility>
+#include <wtf/MonotonicTime.h>
+#include <wtf/Ref.h>
 
 namespace WTF {
 
-class RunLoop::PerformWorkTimerObject : public QObject {
-    Q_OBJECT
-public:
-    PerformWorkTimerObject(RunLoop* runLoop)
-        : m_runLoop(runLoop)
-    {
-        int methodIndex = metaObject()->indexOfMethod("performWork()");
-        m_method = metaObject()->method(methodIndex);
-    }
-
-    Q_SLOT void performWork() { m_runLoop->performWork(); }
-    inline void wakeUp() { m_method.invoke(this, Qt::QueuedConnection); }
-
-private:
-    RunLoop* m_runLoop;
-    QMetaMethod m_method;
+// Protected by the owning RunLoop's m_loopLock. A queued operation retains
+// only this cancellation state, not a raw pointer to a live TimerBase.
+struct RunLoop::QtTimerState {
+    TimerBase* owner { nullptr };
+    uint64_t generation { 0 };
+    bool active { false };
+    bool repeating { false };
+    Seconds interval { 0_s };
+    MonotonicTime deadline;
 };
 
-class RunLoop::TimerObject : public QObject {
+class RunLoop::QtRunLoopObject final : public QObject {
     Q_OBJECT
 public:
-    TimerObject(RunLoop* runLoop)
+    explicit QtRunLoopObject(RunLoop& runLoop)
         : m_runLoop(runLoop)
     {
-        m_startMethod = metaObject()->method(metaObject()->indexOfMethod("startWithLock(RunLoop::TimerBase*,int)"));
-        m_stopMethod = metaObject()->method(metaObject()->indexOfMethod("stopWithLock(RunLoop::TimerBase*)"));
     }
 
-    ~TimerObject()
+    // Called with m_loopLock held, so shutdown cannot delete the QObject
+    // between selecting it and posting a context-bound invocation.
+    void requestTimerUpdate(const std::shared_ptr<QtTimerState>& state)
     {
-        LockHolder locker(m_runLoop->m_loopLock);
-        TimerObjectMap::iterator it = m_runLoop->m_timerObjects.find(QThread::currentThread());
-        if (it != m_runLoop->m_timerObjects.end())
-            m_runLoop->m_timerObjects.remove(it);
+        const auto generation = state->generation;
+        QMetaObject::invokeMethod(this, [this, state, generation] {
+            LockHolder locker(m_runLoop.m_loopLock);
+            if (m_runLoop.m_qtShuttingDown || state->generation != generation)
+                return;
+            removeTimer(state.get());
+            if (state->active && state->owner)
+                installTimer(state, generation);
+        }, Qt::QueuedConnection);
     }
 
-    Q_SLOT void start(RunLoop::TimerBase* timer, int milliseconds) {
-        ASSERT(timer);
-        timer->m_ID = startTimer(milliseconds);
-        ASSERT(timer->m_ID);
-        m_runLoop->m_activeTimers.add(timer->m_ID, timer);
+    void requestWork()
+    {
+        QMetaObject::invokeMethod(this, [this] {
+            {
+                LockHolder locker(m_runLoop.m_loopLock);
+                if (m_runLoop.m_qtShuttingDown)
+                    return;
+            }
+            Ref<RunLoop> protectedRunLoop { m_runLoop };
+            m_runLoop.performWork();
+        }, Qt::QueuedConnection);
     }
 
-    Q_SLOT void stop(RunLoop::TimerBase* timer) {
-        ASSERT(timer);
-        killTimer(timer->m_ID);
-        TimerMap::iterator it = m_runLoop->m_activeTimers.find(timer->m_ID);
-        if (it != m_runLoop->m_activeTimers.end())
-            m_runLoop->m_activeTimers.remove(it);
-        timer->m_ID = 0;
+    // Owning thread only, with m_loopLock held. Do not invoke user code here.
+    void stopAllTimers()
+    {
+        for (auto& entry : m_timers) {
+            killTimer(entry.first);
+            entry.second.state->active = false;
+            ++entry.second.state->generation;
+        }
+        m_timerIDs.clear();
+        m_timers.clear();
     }
-    Q_SLOT void startWithLock(RunLoop::TimerBase* timer, int milliseconds) {
-        LockHolder locker(m_runLoop->m_loopLock);
-        start(timer, milliseconds);
-    }
-    Q_SLOT void stopWithLock(RunLoop::TimerBase* timer) {
-        LockHolder locker(m_runLoop->m_loopLock);
-        stop(timer);
-    }
-
-    inline void startAsync(RunLoop::TimerBase *timer, int milliseconds) { m_startMethod.invoke(this, Qt::QueuedConnection, Q_ARG(RunLoop::TimerBase*, timer), Q_ARG(int, milliseconds)); }
-    inline void stopAsync(RunLoop::TimerBase *timer) { m_stopMethod.invoke(this, Qt::QueuedConnection, Q_ARG(RunLoop::TimerBase*, timer)); }
 
 protected:
     void timerEvent(QTimerEvent* event) override
     {
-        RunLoop::TimerBase::timerFired(m_runLoop, event->timerId());
+        TimerBase* timer = nullptr;
+        std::shared_ptr<QtTimerState> state;
+        uint64_t generation = 0;
+        bool repeating = false;
+        Ref<RunLoop> protectedRunLoop { m_runLoop };
+        {
+            LockHolder locker(m_runLoop.m_loopLock);
+            auto it = m_timers.find(event->timerId());
+            if (it == m_timers.end())
+                return;
+
+            state = it->second.state;
+            generation = it->second.generation;
+            if (m_runLoop.m_qtShuttingDown || !state->owner || !state->active
+                || generation != state->generation) {
+                removeTimer(state.get());
+                return;
+            }
+
+            const auto now = MonotonicTime::now();
+            removeTimer(state.get());
+            // Intervals larger than Qt's int-millisecond limit are armed in
+            // chunks. Also do not fire early if a platform timer wakes early.
+            if (state->deadline > now) {
+                installTimer(state, generation);
+                return;
+            }
+
+            timer = state->owner;
+            repeating = state->repeating;
+            if (repeating)
+                state->deadline = now + state->interval;
+            else
+                state->active = false;
+        }
+
+        // Never hold m_loopLock while calling JSC: its timer manager has its
+        // own lock and can start/stop other timers. A callback may delete its
+        // own timer, so do not access timer after this call.
+        // As in JSC PerVMData, destruction concurrent with firing must be
+        // dispatched to this owning RunLoop; TimerBase is not ref-counted.
+        timer->fired();
+
+        // Do not rearm a repeating timer until its callback returns: a
+        // nested Qt event loop must not recursively fire the same timer.
+        // The callback may delete the TimerBase or initiate shutdown. Use
+        // only retained state/the protected RunLoop, not timer or this.
+        if (repeating) {
+            auto& runLoop = protectedRunLoop.get();
+            LockHolder locker(runLoop.m_loopLock);
+            if (!runLoop.m_qtShuttingDown && state->owner && state->active
+                && generation == state->generation)
+                runLoop.m_qtRunLoopObject->installTimer(state, generation);
+        }
     }
 
 private:
-    RunLoop* m_runLoop;
-    QMetaMethod m_startMethod;
-    QMetaMethod m_stopMethod;
-};
+    struct InstalledTimer {
+        std::shared_ptr<QtTimerState> state;
+        uint64_t generation;
+    };
 
-static QEventLoop* currentEventLoop;
-static bool mainEventLoopIsRunning = false;
+    void removeTimer(QtTimerState* state)
+    {
+        auto it = m_timerIDs.find(state);
+        if (it == m_timerIDs.end())
+            return;
+        const int id = it->second;
+        killTimer(id);
+        m_timerIDs.erase(it);
+        m_timers.erase(id);
+    }
+
+    void installTimer(const std::shared_ptr<QtTimerState>& state, uint64_t generation)
+    {
+        // ceil prevents positive sub-millisecond delays becoming zero timers.
+        // Check before the cast: JSC legitimately schedules decade-long delays.
+        const double remaining = (state->deadline - MonotonicTime::now()).milliseconds();
+        const double maximum = std::numeric_limits<int>::max();
+        const int milliseconds = !(remaining > 0) ? 0
+            : remaining >= maximum ? std::numeric_limits<int>::max()
+            : static_cast<int>(std::ceil(remaining));
+        const int id = startTimer(milliseconds, Qt::PreciseTimer);
+        if (!id) {
+            state->active = false;
+            return;
+        }
+        m_timers.emplace(id, InstalledTimer { state, generation });
+        m_timerIDs.emplace(state.get(), id);
+    }
+
+    RunLoop& m_runLoop;
+    std::unordered_map<int, InstalledTimer> m_timers;
+    std::unordered_map<QtTimerState*, int> m_timerIDs;
+};
 
 void RunLoop::run()
 {
-    /* 
-       This call to QCoreApplication::exec() must be protected to not accidentially be called from another thread.
-       bacause it will lock (freeze) WebKit if it happens.
-    */
-
-    if (!mainEventLoopIsRunning && WTF::isMainThread()) 
+    Ref<RunLoop> protectedRunLoop { RunLoop::current() };
+    auto& runLoop = protectedRunLoop.get();
+    bool useApplicationLoop;
     {
-        mainEventLoopIsRunning = true;
+        LockHolder locker(runLoop.m_loopLock);
+        if (runLoop.m_qtShuttingDown)
+            return;
+        if (runLoop.m_stopRequested) {
+            runLoop.m_stopRequested = false;
+            return;
+        }
+        // A host application can already be inside QApplication::exec().
+        // In that case use a local, nestable loop instead of exec() again.
+        useApplicationLoop = WTF::isMainThread()
+            && !QThread::currentThread()->loopLevel()
+            && !runLoop.m_runningApplicationEventLoop;
+        if (useApplicationLoop)
+            runLoop.m_runningApplicationEventLoop = true;
+    }
+
+    if (useApplicationLoop) {
         QCoreApplication::exec();
-        mainEventLoopIsRunning = false;
-    } 
-    else 
+        LockHolder locker(runLoop.m_loopLock);
+        runLoop.m_runningApplicationEventLoop = false;
+        return;
+    }
+
+    QEventLoop eventLoop;
+    QEventLoop* previousEventLoop;
     {
-        QEventLoop eventLoop;
-        QEventLoop* previousEventLoop = currentEventLoop;
-        currentEventLoop = &eventLoop;
-
-        eventLoop.exec();
-
-        currentEventLoop = previousEventLoop;
+        LockHolder locker(runLoop.m_loopLock);
+        // A stop can arrive while the local QEventLoop is being constructed.
+        if (runLoop.m_qtShuttingDown)
+            return;
+        if (runLoop.m_stopRequested) {
+            runLoop.m_stopRequested = false;
+            return;
+        }
+        previousEventLoop = runLoop.m_activeQtEventLoop;
+        runLoop.m_activeQtEventLoop = &eventLoop;
+    }
+    eventLoop.exec();
+    {
+        LockHolder locker(runLoop.m_loopLock);
+        runLoop.m_activeQtEventLoop = previousEventLoop;
     }
 }
 
 void RunLoop::stop()
 {
-    if (currentEventLoop)
-    {
-        currentEventLoop->exit();
-    }
-    else if(mainEventLoopIsRunning)
-    {
-        QCoreApplication::exit();
-    }
-    else
-    {
-        /*
-          Do nothing?, there is no more QEvenLoops and mainEventLoop was not started
-          Not sure if all this is right, so leaving it as it is
-          Maybe someone with more knowledge will chime in here later to fix this mess.
-        */
+    LockHolder locker(m_loopLock);
+    if (m_qtShuttingDown)
+        return;
+    if (m_activeQtEventLoop) {
+        QMetaObject::invokeMethod(m_activeQtEventLoop, "quit", Qt::QueuedConnection);
         return;
     }
+    if (m_runningApplicationEventLoop) {
+        if (auto* app = QCoreApplication::instance())
+            QMetaObject::invokeMethod(app, "quit", Qt::QueuedConnection);
+        return;
+    }
+    // RunLoop::create() publishes the loop before entering run().
+    m_stopRequested = true;
 }
 
 RunLoop::RunLoop()
 {
-    QEventLoop tmpLoop; // Call QEventLoop ctor for ensureEventDispatcher()
-    qRegisterMetaType<RunLoop::TimerBase*>("RunLoop::TimerBase*");
-    m_timer = new TimerObject(this);
-    m_performWorkTimer = new PerformWorkTimerObject(this);
+    QEventLoop ensureDispatcher; // Qt must also adopt native WTF threads.
+    m_qtRunLoopObject = new QtRunLoopObject(*this);
+
+    // Do the complete WTF shutdown, not just delete its QObject helpers.
+    // If WTF TLS is destroyed first it disconnects this receiver. If Qt
+    // finishes first, the later WTF TLS callback is an idempotent no-op.
+    QObject::connect(QThread::currentThread(), &QThread::finished,
+        m_qtRunLoopObject, [this] { threadWillExit(); }, Qt::DirectConnection);
 }
 
 RunLoop::~RunLoop()
 {
-    delete m_timer;
-    delete m_performWorkTimer;
+    // Holder::threadWillExit (or Qt's earlier finished signal) must detach all
+    // QObjects on the owner thread. Last Ref<RunLoop> may die on ANY thread.
+    RELEASE_ASSERT(!m_qtRunLoopObject);
+}
+
+void RunLoop::prepareForQtThreadExit()
+{
+    LockHolder locker(m_loopLock);
+    m_qtShuttingDown = true;
+    if (m_qtRunLoopObject) {
+        RELEASE_ASSERT(m_qtRunLoopObject->thread() == QThread::currentThread());
+        m_qtRunLoopObject->stopAllTimers();
+    }
+}
+
+void RunLoop::completeQtThreadExit()
+{
+    QtRunLoopObject* object;
+    {
+        LockHolder locker(m_loopLock);
+        object = std::exchange(m_qtRunLoopObject, nullptr);
+    }
+    // No other thread can post through this pointer now. QObject destruction
+    // removes its pending timer-update/work messages and the finished hook.
+    delete object;
 }
 
 void RunLoop::wakeUp()
 {
-    m_performWorkTimer->wakeUp();
+    LockHolder locker(m_loopLock);
+    if (!m_qtShuttingDown && m_qtRunLoopObject)
+        m_qtRunLoopObject->requestWork();
 }
 
 RunLoop::CycleResult RunLoop::cycle(RunLoopMode)
@@ -186,89 +324,62 @@ RunLoop::CycleResult RunLoop::cycle(RunLoopMode)
     return CycleResult::Continue;
 }
 
-// RunLoop::Timer
-
-void RunLoop::TimerBase::timerFired(RunLoop* runLoop, int ID)
-{
-    TimerMap::iterator it = runLoop->m_activeTimers.find(ID);
-    ASSERT(it != runLoop->m_activeTimers.end());
-    TimerBase* timer = it->value;
-
-    if (!timer->m_isRepeating)
-        timer->stop();
-
-    timer->fired();
-}
-
 RunLoop::TimerBase::TimerBase(RunLoop& runLoop)
     : m_runLoop(runLoop)
-    , m_ID(0)
-    , m_isRepeating(false)
+    , m_qtTimerState(std::make_shared<QtTimerState>())
 {
+    m_qtTimerState->owner = this;
 }
 
 RunLoop::TimerBase::~TimerBase()
 {
-    stop();
+    LockHolder locker(m_runLoop->m_loopLock);
+    m_qtTimerState->owner = nullptr;
+    m_qtTimerState->active = false;
+    ++m_qtTimerState->generation;
+    if (!m_runLoop->m_qtShuttingDown && m_runLoop->m_qtRunLoopObject)
+        m_runLoop->m_qtRunLoopObject->requestTimerUpdate(m_qtTimerState);
 }
 
-void RunLoop::TimerBase::start(Seconds nextFireInterval, bool repeat)
+void RunLoop::TimerBase::start(Seconds interval, bool repeat)
 {
-    stop();
-
     LockHolder locker(m_runLoop->m_loopLock);
-
-    m_isActive = true;
-    m_isRepeating = repeat;
-    int millis = nextFireInterval.millisecondsAs<int>();
-    if (m_runLoop->m_timer->thread() == QThread::currentThread())
-        m_runLoop->m_timer->start(this, millis);
-    else {
-        QThread* thread = QThread::currentThread();
-        TimerObjectMap::iterator it = m_runLoop->m_timerObjects.find(thread);
-        TimerObject* timer = 0;
-        if (it == m_runLoop->m_timerObjects.end()) {
-            timer = new TimerObject(m_runLoop.ptr());
-            timer->moveToThread(thread);
-            m_runLoop->m_timerObjects.set(thread, timer);
-        } else
-            timer = it->value;
-
-        ASSERT(timer);
-        timer->startAsync(this, millis);
+    ++m_qtTimerState->generation;
+    if (m_runLoop->m_qtShuttingDown) {
+        m_qtTimerState->active = false;
+        return;
     }
+    interval = std::max(0_s, interval);
+    m_qtTimerState->active = true;
+    m_qtTimerState->repeating = repeat;
+    m_qtTimerState->interval = interval;
+    m_qtTimerState->deadline = MonotonicTime::now() + interval;
+    m_runLoop->m_qtRunLoopObject->requestTimerUpdate(m_qtTimerState);
 }
 
 void RunLoop::TimerBase::stop()
 {
     LockHolder locker(m_runLoop->m_loopLock);
-    if (!m_isActive)
-        return;
-
-    m_isActive = false;
-
-    if (m_runLoop->m_timer->thread() == QThread::currentThread())
-        m_runLoop->m_timer->stop(this);
-    else {
-        QThread* thread = QThread::currentThread();
-        TimerObjectMap::iterator it = m_runLoop->m_timerObjects.find(thread);
-        if (it != m_runLoop->m_timerObjects.end())
-            it->value->stopAsync(this);;
-    }
+    m_qtTimerState->active = false;
+    ++m_qtTimerState->generation;
+    if (!m_runLoop->m_qtShuttingDown && m_runLoop->m_qtRunLoopObject)
+        m_runLoop->m_qtRunLoopObject->requestTimerUpdate(m_qtTimerState);
 }
 
 bool RunLoop::TimerBase::isActive() const
 {
     LockHolder locker(m_runLoop->m_loopLock);
-    return m_isActive;
+    return !m_runLoop->m_qtShuttingDown && m_qtTimerState->active;
 }
 
 Seconds RunLoop::TimerBase::secondsUntilFire() const
 {
-    // FIXME: implement for WebKit
-    return 0_s;
+    LockHolder locker(m_runLoop->m_loopLock);
+    if (m_runLoop->m_qtShuttingDown || !m_qtTimerState->active)
+        return 0_s;
+    return std::max(0_s, m_qtTimerState->deadline - MonotonicTime::now());
 }
 
-#include "RunLoopQt.moc"
-
 } // namespace WTF
+
+#include "RunLoopQt.moc"

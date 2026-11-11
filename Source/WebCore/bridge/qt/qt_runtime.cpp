@@ -1685,10 +1685,10 @@ void QtConnectionObject::execute(void** argv)
     const QMetaObject* meta = sender->metaObject();
     const QMetaMethod method = meta->method(m_signalIndex);
 
-    JSValueRef* ignoredException = 0;
-    JSRetainPtr<JSStringRef> lengthProperty(Adopt, JSStringCreateWithUTF8CString("length"));
-    int receiverLength = int(JSValueToNumber(m_context, JSObjectGetProperty(m_context, m_receiverFunction, lengthProperty.get(), ignoredException), ignoredException));
-    int argc = qMax(method.parameterCount(), receiverLength);
+    JSValueRef* ignoredException = nullptr;
+    // argv contains only the Qt signal's actual parameters. JavaScript binds
+    // any additional declared function parameters to undefined itself.
+    const int argc = method.parameterCount();
     WTF::Vector<JSValueRef> args(argc);
 
     for (int i = 0; i < argc; i++) {
