@@ -860,16 +860,16 @@ _hb_qt_font_get_glyph_h_kerning(hb_font_t *font, void *font_data,
     Q_ASSERT(fe);
 
     glyph_t glyphs[2] = { first_glyph, second_glyph };
-    QFixed advance;
+    QFixed advances[2];
 
     QGlyphLayout g;
     g.numGlyphs = 2;
     g.glyphs = glyphs;
-    g.advances = &advance;
+    g.advances = advances;
 
     fe->doKerning(&g, QFontEngine::ShaperFlags(hb_qt_font_get_use_design_metrics(font)));
 
-    return advance.value();
+    return advances[0].value();
 }
 
 static hb_bool_t

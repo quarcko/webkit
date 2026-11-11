@@ -935,9 +935,11 @@ endif ()
 
 include(KDEInstallDirs)
 
-if (NOT qt_install_prefix_dir STREQUAL "${CMAKE_INSTALL_PREFIX}")
-    set(KDE_INSTALL_USE_QT_SYS_PATHS OFF)
-endif ()
+# The separate-prefix override was removed.
+# KDE_INSTALL_USE_QT_SYS_PATHS now respects the CMake option.
+#if (NOT qt_install_prefix_dir STREQUAL "${CMAKE_INSTALL_PREFIX}")
+#    set(KDE_INSTALL_USE_QT_SYS_PATHS OFF)
+#endif ()
 
 # We split all installed files into 2 components: Code and Data. This is different from
 # traditional approach with Runtime and Devel, but we need it to fix concurrent installation of

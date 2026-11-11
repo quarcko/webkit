@@ -110,6 +110,16 @@ function(ECM_GENERATE_PRI_FILE)
   set(multiValueArgs )
 
   cmake_parse_arguments(EGPF "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  
+  # Use Qt-relative paths for QtWebKit private qmake modules too.
+  # The public module files already use these paths.
+  if (KDE_INSTALL_USE_QT_SYS_PATHS
+      AND EGPF_BASE_NAME MATCHES "^(webkit|webkitwidgets)_private$")
+
+      set(EGPF_LIB_INSTALL_DIR "$$QT_MODULE_LIB_BASE")
+      set(EGPF_BIN_INSTALL_DIR "$$QT_MODULE_BIN_BASE")
+
+  endif ()
 
   if(EGPF_UNPARSED_ARGUMENTS)
     message(FATAL_ERROR "Unknown keywords given to ECM_GENERATE_PRI_FILE(): \"${EGPF_UNPARSED_ARGUMENTS}\"")

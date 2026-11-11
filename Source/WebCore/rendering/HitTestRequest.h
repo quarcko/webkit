@@ -116,10 +116,10 @@ private:
         return static_cast<HitTestRequest::Type>(~static_cast<int>(x));
       }
       
-      inline constexpr HitTestRequest::Type
+      inline constexpr bool
       operator!(HitTestRequest::Type x)
       {
-        return static_cast<HitTestRequest::Type>(!static_cast<int>(x));
+        return !static_cast<int>(x);
       }
 
       inline HitTestRequest::Type &

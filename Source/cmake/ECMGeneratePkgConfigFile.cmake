@@ -176,13 +176,29 @@ function(ECM_GENERATE_PKGCONFIG_FILE)
   if (EGPF_FILENAME_VAR)
      set(${EGPF_FILENAME_VAR} ${PKGCONFIG_FILENAME} PARENT_SCOPE)
   endif()
+  
+  set(_qtwebkit_pc_variables "")
 
-  file(WRITE ${PKGCONFIG_FILENAME}
-"
+  if (KDE_INSTALL_USE_QT_SYS_PATHS)
+      get_filename_component(_qtwebkit_pc_header_dir
+          "${EGPF_INCLUDE_INSTALL_DIR}" NAME)
+
+      set(PKGCONFIG_TARGET_LIBS "\${libdir}")
+
+      set(PKGCONFIG_TARGET_INCLUDES
+          "-I\${includedir}/${_qtwebkit_pc_header_dir} -I\${includedir}")
+
+      set(_qtwebkit_pc_variables
+          "prefix=\${pcfiledir}/../..\nlibdir=\${pcfiledir}/..\nincludedir=\${prefix}/include\n")
+  endif ()
+
+  file(WRITE "${PKGCONFIG_FILENAME}"
+  
+"${_qtwebkit_pc_variables}
 Name: ${PKGCONFIG_TARGET_LIBNAME}
 Description: ${PKGCONFIG_TARGET_DESCRIPTION}
 Version: ${PROJECT_VERSION}
-Libs: -L${CMAKE_INSTALL_PREFIX}/${EGPF_LIB_INSTALL_DIR} -l${PKGCONFIG_TARGET_LIBNAME}
+Libs: -L${PKGCONFIG_TARGET_LIBS} -l${PKGCONFIG_TARGET_LIBNAME}
 Cflags: ${PKGCONFIG_TARGET_INCLUDES} ${PKGCONFIG_TARGET_DEFINES}
 Requires: ${PKGCONFIG_TARGET_DEPS}
 "
