@@ -1,0 +1,98 @@
+name: Draft Release For Tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      coin_build_number:
+        description: "Coin build number, e.g. 1600955993"
+        required: true
+      qt_version:
+        description: "Qt version used for building artifacts, e.g. 6.6.1"
+        required: true
+      tag_name:
+        description: "Tag name, e.g. qtwebkit-5.212.0-alpha5"
+        required: true
+      human_readable_version_name:
+        description: "Human readable version name, e.g. 5.212.0 Alpha 5"
+        required: true
+
+env:
+  QTWEBKIT_BRANCH: 5.212
+  QTWEBKIT_DOWNLOAD_ROOT: "https://download.qt.io/snapshots/ci/qtwebkit"
+  QTWEBKIT_SNAPSHOTS_REPO: "git://code.qt.io/qt/qtwebkit.git"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download QtWebKit artifacts
+      id: qtwebkit_artifacts
+      run: |
+        download_qtwebkit_dir() {
+          wget -r -np -nH --cut-dirs="$1" --reject="index.html*,*.mirrorlist" "${QTWEBKIT_DOWNLOAD_ROOT}/${QTWEBKIT_BRANCH}/${{ github.event.inputs.coin_build_number }}/$2/"
+        }
+
+        download_qtwebkit_dir 6 qtwebkit
+        download_qtwebkit_dir 7 src/submodules
+        download_qtwebkit_dir 6 debug_information
+
+    - name: Parse snapshot tag
+      run: |
+        snapshot_sha1=$(cat SHA1)
+        git clone --depth 10 "$QTWEBKIT_SNAPSHOTS_REPO" qtwebkit-snapshots -b $QTWEBKIT_BRANCH
+        cd qtwebkit-snapshots
+        original_sha1=$(git log -n1 $snapshot_sha1 | awk '/\s+Import QtWebKit commit [0-9a-f]+$/ {print $NF}')
+        echo "Snapshot commit: $snapshot_sha1 Original commit: $original_sha1"
+        echo "Pushed tag: ${{ github.event.inputs.tag_name }}"
+        echo "Pushed SHA: ${{ github.sha }}"
+
+    - name: Repack sources
+      run: |
+        tar xJf qtwebkit-opensource-src-${{ env.QTWEBKIT_BRANCH }}.tar.xz
+        mv qtwebkit-opensource-src-${{ env.QTWEBKIT_BRANCH }} ${{ github.event.inputs.tag_name }}
+        tar cf ${{ github.event.inputs.tag_name }}.tar ${{ github.event.inputs.tag_name }}
+        xz -9 ${{ github.event.inputs.tag_name }}.tar
+        rm -rf ${{ github.event.inputs.tag_name }}
+
+        unzip -q qtwebkit-opensource-src-${{ env.QTWEBKIT_BRANCH }}.zip
+        mv qtwebkit-opensource-src-${{ env.QTWEBKIT_BRANCH }} ${{ github.event.inputs.tag_name }}
+        zip -q9r ${{ github.event.inputs.tag_name }}.zip ${{ github.event.inputs.tag_name }}
+        rm -rf ${{ github.event.inputs.tag_name }}
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.event.inputs.tag_name }}
+        release_name: QtWebKit ${{ steps.tag_name_short.outputs.tag }} FIXME!
+        draft: true
+        prerelease: true
+        body: |
+          **WARNING**: This release is based on **old WebKit revision** with known unpatched vulnerabilities. **Please use it carefully and avoid visiting untrusted websites and using it for transmission of sensitive data**. Please wait for new release from **qtwebkit-dev** branch to use it with untrusted content.
+
+          **IMPORTANT**: Please download our source code packages **${{ github.event.inputs.tag_name }}.tar.xz** or **${{ github.event.inputs.tag_name }}.zip** (Windows line breaks) and **NOT the automatically created GitHub packages at the bottom of the list**.
+
+          <Insert changelog here>
+
+          Binary packages should be unpacked inside installation of Qt **${{ github.event.inputs.qt_version }}** which you can obtain at https://www.qt.io/download-qt-installer.
+
+          Coin build number was ${{ github.event.inputs.coin_build_number }}
+
+    - name: Upload sources
+      uses: csexton/release-asset-action@v2
+      with:
+        files: |
+          ${{ github.event.inputs.tag_name }}.tar.xz
+          ${{ github.event.inputs.tag_name }}.zip
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        release-url: ${{ steps.create_release.outputs.upload_url }}
+
+    - name: Upload binaries
+      uses: csexton/release-asset-action@v2
+      with:
+        pattern: "*.7z"
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        release-url: ${{ steps.create_release.outputs.upload_url }}

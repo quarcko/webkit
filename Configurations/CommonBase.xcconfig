@@ -1,0 +1,116 @@
+// Copyright (C) 2022-2025 Apple Inc. All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+// PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+// CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+// EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+// PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+// OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+#include? "../../Internal/Configurations/HaveInternalSDK.xcconfig"
+#include? "<DEVELOPER_DIR>/AppleInternal/XcodeConfig/PlatformSupport.xcconfig"
+#include "Sanitizers.xcconfig"
+#include "SDKVariant.xcconfig"
+#include "WebKitProjectPaths.xcconfig"
+#include "SDKAdditions.xcconfig"
+
+// Prefix Definitions
+//
+// WK_COMMON_ prefix is used to define variables in CommonBase.xcconfig
+// that may be used in project xcconfig files when $(inherited) is not
+// used.
+// Examples: WK_COMMON_OTHER_{CFLAGS,CPLUSPLUSFLAGS,LDFLAGS}.
+//
+// WK_DEFAULT_ prefix is used in Base.xcconfig project files for
+// single-value variables that may be overridden in CommonBase.xcconfig.
+// Example: WK_DEFAULT_GCC_OPTIMIZATION_LEVEL.
+
+GCC_OPTIMIZATION_LEVEL = $(WK_GCC_OPTIMIZATION_LEVEL_SANITIZER_OVERRIDE_$(WK_ANY_SANITIZER_ENABLED));
+WK_GCC_OPTIMIZATION_LEVEL_SANITIZER_OVERRIDE_NO = $(WK_DEFAULT_GCC_OPTIMIZATION_LEVEL);
+WK_GCC_OPTIMIZATION_LEVEL_SANITIZER_OVERRIDE_YES = $(WK_SANITIZER_GCC_OPTIMIZATION_LEVEL);
+
+WK_OS_UNFAIR_LOCK_INLINE_CFLAGS = $(WK_OS_UNFAIR_LOCK_INLINE_CFLAGS_$(USE_INTERNAL_SDK));
+WK_OS_UNFAIR_LOCK_INLINE_CFLAGS_YES = OS_UNFAIR_LOCK_INLINE=1
+GCC_PREPROCESSOR_DEFINITIONS = $(inherited) $(WK_OS_UNFAIR_LOCK_INLINE_CFLAGS);
+
+WK_COMMON_OTHER_CFLAGS = $(WK_SANITIZER_OTHER_CFLAGS) $(WK_COMMON_OTHER_CFLAGS_PGO_$(WK_OR_$(CLANG_USE_OPTIMIZATION_PROFILE)_$(CLANG_INSTRUMENT_FOR_OPTIMIZATION_PROFILING)));
+// Work around rdar://141760829 until the fix is available on all clang-1700
+// based toolchains.
+WK_COMMON_OTHER_CFLAGS_PGO_YES = -mllvm -system-headers-coverage;
+WK_COMMON_OTHER_CFLAGS_PGO_YES[sdk=macosx13.*] = ;
+WK_COMMON_OTHER_CFLAGS_PGO_YES[sdk=macosx14.*] = ;
+OTHER_CFLAGS = $(inherited) $(WK_COMMON_OTHER_CFLAGS);
+
+WK_COMMON_OTHER_CPLUSPLUSFLAGS = $(WK_LIBCPP_ASSERTIONS_CFLAGS);
+OTHER_CPLUSPLUSFLAGS = $(inherited) $(WK_COMMON_OTHER_CPLUSPLUSFLAGS);
+
+_EXPERIMENTAL_SWIFT_EXPLICIT_MODULES = $(WK_DEFAULT_SWIFT_ENABLE_EXPLICIT_MODULES);
+WK_DEFAULT_SWIFT_ENABLE_EXPLICIT_MODULES = YES;
+WK_DEFAULT_SWIFT_ENABLE_EXPLICIT_MODULES[sdk=macosx14*] = ;
+
+WK_COMMON_OTHER_LDFLAGS = $(WK_SANITIZER_OTHER_LDFLAGS) $(WK_COMMON_OTHER_LDFLAGS_INSTRUMENTATION_$(CLANG_INSTRUMENT_FOR_OPTIMIZATION_PROFILING));
+// Work around rdar://151083138 by moving the section the profiling runtime
+// mmaps to its own segment.
+WK_COMMON_OTHER_LDFLAGS_INSTRUMENTATION_YES = -Wl,-rename_section,__DATA,__llvm_prf_cnts,__MMAP_DATA,__llvm_prf_cnts;
+OTHER_LDFLAGS = $(inherited) $(WK_COMMON_OTHER_LDFLAGS);
+
+WK_COMMON_OTHER_TAPI_FLAGS = -x objective-c++ -std=c++2b -fno-rtti $(WK_SANITIZER_OTHER_TAPI_FLAGS);
+OTHER_TAPI_FLAGS = $(inherited) $(WK_COMMON_OTHER_TAPI_FLAGS);
+
+// SPI auditing is only enabled on public iOS SDK builds. Set WK_AUDIT_SPI to
+// YES in local overrides to enable checking.
+WK_DEFAULT_WK_AUDIT_SPI[sdk=iphoneos*] = $(WK_NOT_$(USE_INTERNAL_SDK));
+WK_AUDIT_SPI = $(WK_DEFAULT_WK_AUDIT_SPI);
+
+GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
+
+WK_COMMON_WARNING_CFLAGS = -Wall -Wc99-designator -Wconditional-uninitialized -Wextra -Wdeprecated-enum-enum-conversion -Wdeprecated-enum-float-conversion -Wenum-float-conversion -Wfinal-dtor-non-final-class -Wformat=2 -Wmisleading-indentation -Wpointer-to-int-cast -Wreorder-init-list -Wundef -Wunused-but-set-variable -Wvla;
+WARNING_CFLAGS = $(inherited) $(WK_COMMON_WARNING_CFLAGS) $(WK_SANITIZER_WARNING_CFLAGS);
+
+WK_NO_UNSAFE_BUFFER_USAGE_IN_LIBC_CALL = ;
+WK_NO_UNSAFE_BUFFER_USAGE_IN_LIBC_CALL[sdk=macosx13*] = ;
+WK_NO_UNSAFE_BUFFER_USAGE_IN_LIBC_CALL[sdk=macosx14*] = ;
+WK_NO_UNSAFE_BUFFER_USAGE_IN_LIBC_CALL[sdk=macosx15.0*] = ;
+WK_NO_UNSAFE_BUFFER_USAGE_IN_LIBC_CALL[sdk=macosx15.1*] = ;
+WK_NO_UNSAFE_BUFFER_USAGE_IN_LIBC_CALL[sdk=macosx15.2*] = ;
+WK_NO_UNSAFE_BUFFER_USAGE_IN_LIBC_CALL[sdk=macosx15.3*] = ;
+WK_NO_UNSAFE_BUFFER_USAGE_IN_LIBC_CALL[sdk=iphone*18.0*] = ;
+WK_NO_UNSAFE_BUFFER_USAGE_IN_LIBC_CALL[sdk=iphone*18.1*] = ;
+WK_NO_UNSAFE_BUFFER_USAGE_IN_LIBC_CALL[sdk=iphone*18.2*] = ;
+WK_NO_UNSAFE_BUFFER_USAGE_IN_LIBC_CALL[sdk=iphone*18.3*] = ;
+WK_NO_UNSAFE_BUFFER_USAGE_IN_LIBC_CALL[sdk=appletv*18.0*] = ;
+WK_NO_UNSAFE_BUFFER_USAGE_IN_LIBC_CALL[sdk=appletv*18.1*] = ;
+WK_NO_UNSAFE_BUFFER_USAGE_IN_LIBC_CALL[sdk=appletv*18.2*] = ;
+WK_NO_UNSAFE_BUFFER_USAGE_IN_LIBC_CALL[sdk=appletv*18.3*] = ;
+WK_NO_UNSAFE_BUFFER_USAGE_IN_LIBC_CALL[sdk=watch*11.0*] = ;
+WK_NO_UNSAFE_BUFFER_USAGE_IN_LIBC_CALL[sdk=watch*11.1*] = ;
+WK_NO_UNSAFE_BUFFER_USAGE_IN_LIBC_CALL[sdk=watch*11.2*] = ;
+WK_NO_UNSAFE_BUFFER_USAGE_IN_LIBC_CALL[sdk=watch*11.3*] = ;
+WK_NO_UNSAFE_BUFFER_USAGE_IN_LIBC_CALL[sdk=xr*2.0*] = ;
+WK_NO_UNSAFE_BUFFER_USAGE_IN_LIBC_CALL[sdk=xr*2.1*] = ;
+WK_NO_UNSAFE_BUFFER_USAGE_IN_LIBC_CALL[sdk=xr*2.2*] = ;
+WK_NO_UNSAFE_BUFFER_USAGE_IN_LIBC_CALL[sdk=xr*2.3*] = ;
+
+CLANG_CXX_STANDARD_LIBRARY_HARDENING = extensive;
+
+// Setting CLANG_CXX_STANDARD_LIBRARY_HARDENING is sufficient in recent XCode versions but we want to keep
+// the libcpp assertion enabled on downlevels so use `-D_LIBCPP_ENABLE_ASSERTIONS=1` as well.
+WK_LIBCPP_ASSERTIONS_CFLAGS[sdk=iphone*17*] = -D_LIBCPP_ENABLE_ASSERTIONS=1;
+WK_LIBCPP_ASSERTIONS_CFLAGS[sdk=macosx14*] = -D_LIBCPP_ENABLE_ASSERTIONS=1;
+WK_LIBCPP_ASSERTIONS_CFLAGS[sdk=appletv*17*] = -D_LIBCPP_ENABLE_ASSERTIONS=1;
+WK_LIBCPP_ASSERTIONS_CFLAGS[sdk=watch*10*] = -D_LIBCPP_ENABLE_ASSERTIONS=1;
+
