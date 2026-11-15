@@ -908,9 +908,9 @@ endif ()
 
 include(KDEInstallDirs)
 
-if (NOT qt_install_prefix_dir STREQUAL "${CMAKE_INSTALL_PREFIX}")
-    set(KDE_INSTALL_USE_QT_SYS_PATHS OFF)
-endif ()
+# Respect an explicit -DKDE_INSTALL_USE_QT_SYS_PATHS=ON even when the
+# staging/install prefix differs from the Qt SDK's original prefix.
+# The generated package and module files then use relocatable Qt-relative paths.
 
 # We split all installed files into 2 components: Code and Data. This is different from
 # traditional approach with Runtime and Devel, but we need it to fix concurrent installation of

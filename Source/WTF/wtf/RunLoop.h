@@ -55,8 +55,8 @@
 #endif
 
 #if PLATFORM(QT)
-#include <QMetaType>
-class QThread;
+#include <QEventLoop>
+#include <memory>
 #endif
 
 #if USE(GENERIC_EVENT_LOOP)
@@ -84,6 +84,9 @@ template<typename T> struct IsDeprecatedTimerSmartPointerException : std::false_
 
 class WTF_CAPABILITY("is current") RunLoop final : public GuaranteedSerialFunctionDispatcher {
     WTF_MAKE_NONCOPYABLE(RunLoop);
+#if PLATFORM(QT)
+    struct QtTimerState;
+#endif
 public:
     // Must be called from the main thread.
     WTF_EXPORT_PRIVATE static void initializeMain();
@@ -175,10 +178,8 @@ public:
 #elif USE(COCOA_EVENT_LOOP)
         RetainPtr<CFRunLoopTimerRef> m_timer;
 #elif PLATFORM(QT)
-        static void timerFired(RunLoop*, int ID);
-        int m_ID;
-        bool m_isActive { false };
-        bool m_isRepeating { false };
+        // Async Qt timer messages hold this cancellation state, never TimerBase*.
+        std::shared_ptr<QtTimerState> m_qtTimerState;
 #elif USE(GLIB_EVENT_LOOP)
         void updateReadyTime();
         GRefPtr<GSource> m_source;
@@ -271,6 +272,9 @@ private:
 
     Lock m_nextIterationLock;
     Deque<Function<void()>> m_nextIteration WTF_GUARDED_BY_LOCK(m_nextIterationLock);
+#if PLATFORM(QT)
+    bool m_dispatchClosed WTF_GUARDED_BY_LOCK(m_nextIterationLock) { false };
+#endif
 
     bool m_isFunctionDispatchSuspended { false };
     bool m_hasSuspendedFunctions { false };
@@ -287,15 +291,17 @@ private:
     RetainPtr<CFRunLoopRef> m_runLoop;
     RetainPtr<CFRunLoopSourceRef> m_runLoopSource;
 #elif PLATFORM(QT)
-    class TimerObject;
-    class PerformWorkTimerObject;
-    PerformWorkTimerObject* m_performWorkTimer;
-    TimerObject* m_timer;
-    typedef HashMap<int, TimerBase*> TimerMap;
-    TimerMap m_activeTimers;
-    typedef HashMap<QThread*, TimerObject*> TimerObjectMap;
-    TimerObjectMap m_timerObjects;
+    class QtRunLoopObject;
+    void prepareForQtThreadExit();
+    void completeQtThreadExit();
+
+    // All access to the QObject pointer and timer state is protected by this lock.
     Lock m_loopLock;
+    QtRunLoopObject* m_qtRunLoopObject { nullptr };
+    bool m_qtShuttingDown { false };
+    QEventLoop* m_activeQtEventLoop { nullptr };
+    bool m_runningApplicationEventLoop { false };
+    bool m_stopRequested { false };
 #elif USE(GLIB_EVENT_LOOP)
     void notify(Event, const char*);
 
@@ -348,6 +354,3 @@ using WTF::RunLoop;
 using WTF::RunLoopMode;
 using WTF::assertIsCurrent;
 
-#if PLATFORM(QT)
-Q_DECLARE_METATYPE(WTF::RunLoop::TimerBase*)
-#endif

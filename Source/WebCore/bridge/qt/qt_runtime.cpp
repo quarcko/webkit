@@ -49,6 +49,9 @@
 #include <QDebug>
 #include <QMetaObject>
 #include <QMetaType>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+#include <QtCore/qtmochelpers.h>
+#endif
 #include <QObject>
 #include <QStringList>
 #include <QVarLengthArray>
@@ -1519,6 +1522,7 @@ QtConnectionObject::~QtConnectionObject()
 }
 
 // Begin moc-generated code -- modify with care! Check "HAND EDIT" parts
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
 struct qt_meta_stringdata_QtConnectionObject_t {
     const uint offsetsAndSize[6];
     char stringdata0[44];
@@ -1559,6 +1563,7 @@ static const uint qt_meta_data_QtConnectionObject[] = {
 
        0        // eod
 };
+#endif // legacy Qt 6.0-6.9 metadata layout
 
 void QtConnectionObject::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
@@ -1572,6 +1577,40 @@ void QtConnectionObject::qt_static_metacall(QObject *_o, QMetaObject::Call _c, i
     }
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+
+// Qt 6.10+ meta-object format, adapted from the working WebKit 618 fork.
+// Keep qt_static_metacall: it passes the signal's raw argv to execute().
+static constexpr auto qt_connection_metaobject_content = [] {
+    namespace QMC = QtMocConstants;
+
+    QtMocHelpers::StringRefStorage strings {
+        "JSC::Bindings::QtConnectionObject", "execute", ""
+    };
+    QtMocHelpers::UintData methods {
+        QtMocHelpers::SlotData<void()>(1, 2, QMC::AccessPublic, QMetaType::Void)
+    };
+    QtMocHelpers::UintData properties { };
+    QtMocHelpers::UintData enums { };
+
+    return QtMocHelpers::metaObjectData<QtConnectionObject, void>(
+        QMC::MetaObjectFlag{}, strings, methods, properties, enums);
+}();
+
+static constexpr auto qt_connection_metaobject_static = qt_connection_metaobject_content.staticData;
+static constexpr auto qt_connection_metaobject_relocating = qt_connection_metaobject_content.relocatingData;
+
+const QMetaObject QtConnectionObject::staticMetaObject = { {
+    QMetaObject::SuperData::link<QObject::staticMetaObject>(),
+    qt_connection_metaobject_static.stringdata,
+    qt_connection_metaobject_static.data,
+    qt_static_metacall,
+    nullptr,
+    qt_connection_metaobject_relocating.metaTypes,
+    nullptr
+} };
+
+#else // Qt < 6.10
 const QMetaObject QtConnectionObject::staticMetaObject = { {
     QMetaObject::SuperData::link<QObject::staticMetaObject>(),
     qt_meta_stringdata_QtConnectionObject.offsetsAndSize,
@@ -1581,6 +1620,7 @@ const QMetaObject QtConnectionObject::staticMetaObject = { {
     nullptr,
     nullptr
 } };
+#endif // Qt version
 
 const QMetaObject *QtConnectionObject::metaObject() const
 {
@@ -1589,8 +1629,13 @@ const QMetaObject *QtConnectionObject::metaObject() const
 
 void *QtConnectionObject::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
+    if (!_clname)
+        return nullptr;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+    if (!strcmp(_clname, "JSC::Bindings::QtConnectionObject"))
+#else
     if (!strcmp(_clname, qt_meta_stringdata_QtConnectionObject.stringdata0))
+#endif
         return static_cast<void*>(const_cast<QtConnectionObject*>(this));
     return QObject::qt_metacast(_clname);
 }
@@ -1615,10 +1660,10 @@ void QtConnectionObject::execute(void** argv)
     const QMetaObject* meta = sender->metaObject();
     const QMetaMethod method = meta->method(m_signalIndex);
 
-    JSValueRef* ignoredException = 0;
-    JSRetainPtr<JSStringRef> lengthProperty(Adopt, JSStringCreateWithUTF8CString("length"));
-    int receiverLength = int(JSValueToNumber(m_context, JSObjectGetProperty(m_context, m_receiverFunction, lengthProperty.get(), ignoredException), ignoredException));
-    int argc = qMax(method.parameterCount(), receiverLength);
+    JSValueRef* ignoredException = nullptr;
+    // argv only has the actual Qt signal arguments. JS supplies undefined
+    // for any extra formal parameters declared by the JS callback.
+    const int argc = method.parameterCount();
     WTF::Vector<JSValueRef> args(argc);
 
     for (int i = 0; i < argc; i++) {

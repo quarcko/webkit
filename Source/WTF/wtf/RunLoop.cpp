@@ -159,11 +159,22 @@ void RunLoop::dispatch(Function<void()>&& function)
 {
     RELEASE_ASSERT(function);
     bool needsWakeup = false;
-
+#if PLATFORM(QT)
+    // Destruction of a rejected callback may recursively dispatch or cancel
+    // timers. Never destroy it while holding m_nextIterationLock.
+    Function<void()> rejectedFunction;
+#endif
     {
         Locker locker { m_nextIterationLock };
-        needsWakeup = m_nextIteration.isEmpty();
-        m_nextIteration.append(WTFMove(function));
+#if PLATFORM(QT)
+        if (m_dispatchClosed)
+            rejectedFunction = WTFMove(function);
+        else
+#endif
+        {
+            needsWakeup = m_nextIteration.isEmpty();
+            m_nextIteration.append(WTFMove(function));
+        }
     }
 
     if (needsWakeup)
@@ -196,11 +207,30 @@ void RunLoop::suspendFunctionDispatchForCurrentCycle()
 
 void RunLoop::threadWillExit()
 {
+#if PLATFORM(QT)
+    // Qt's finished notification and WTF's TLS destructor can both invoke this.
+    Deque<Function<void()>> pendingFunctions;
+    {
+        Locker locker { m_nextIterationLock };
+        if (m_dispatchClosed)
+            return;
+        m_dispatchClosed = true;
+        pendingFunctions = std::exchange(m_nextIteration, { });
+    }
+
+    Ref<RunLoop> protectedThis { *this };
+    auto currentFunctions = std::exchange(m_currentIteration, { });
+    prepareForQtThreadExit();
+    currentFunctions.clear();
+    pendingFunctions.clear();
+    completeQtThreadExit();
+#else
     m_currentIteration.clear();
     {
         Locker locker { m_nextIterationLock };
         m_nextIteration.clear();
     }
+#endif
 }
 
 } // namespace WTF

@@ -1,6 +1,7 @@
 *.pbxuser
 *.perspective*
 *.pyc
+._*
 .DS_Store
 .directory
 /WebKitBuild/
@@ -14,6 +15,7 @@ DerivedData
 .mailmap
 results
 
+qtwebkit-2025-06-10-src.tar.xz
 /build*/
 
 # Ignore Buildstream local files

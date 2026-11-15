@@ -405,10 +405,16 @@ void ScrollAnimator::removeWheelEventTestCompletionDeferralForReason(ScrollingNo
     m_wheelEventTestMonitor->removeDeferralForReason(identifier, reason);
 }
 
-#if USE(COORDINATED_GRAPHICS)
+#if PLATFORM(QT) || USE(COORDINATED_GRAPHICS)
 bool ScrollAnimator::scrollAnimationEnabled() const
 {
+#if PLATFORM(QT)
+    // The Qt port does not yet implement animated wheel scrolling.
+    // Force the immediate scrolling path (port of f2cfa163e18a).
+    return false;
+#else
     return m_scrollableArea.scrollAnimatorEnabled();
+#endif
 }
 #endif
 
