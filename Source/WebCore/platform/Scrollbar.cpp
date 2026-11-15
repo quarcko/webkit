@@ -346,7 +346,7 @@ bool Scrollbar::gestureEvent(const PlatformGestureEvent& evt)
 {
     bool handled = false;
     switch (evt.type()) {
-    case PlatformEvent::GestureTap:
+    case PlatformEvent::Type::GestureTap:
         if (m_pressedPart != ThumbPart && m_pressedPart != NoPart)
             handled = m_scrollableArea.scroll(pressedPartScrollDirection(), pressedPartScrollGranularity());
         break;

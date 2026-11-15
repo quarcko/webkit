@@ -151,10 +151,6 @@ public:
     virtual IntRect visibleRectForTiledBackingStore() const;
 #endif
 
-#if ENABLE(TOUCH_EVENTS)
-    void needTouchEvents(bool) final { }
-#endif
-
     void isPlayingMediaDidChange(MediaProducerMediaStateFlags) final;
 
 #if ENABLE(VIDEO) && ((USE(GSTREAMER) && USE(NATIVE_FULLSCREEN_VIDEO)) || USE(QT_MULTIMEDIA))

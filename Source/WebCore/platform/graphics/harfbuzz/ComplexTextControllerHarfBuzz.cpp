@@ -41,9 +41,8 @@
 #include <harfbuzz/hb-ot.h>
 
 #if PLATFORM(QT)
-#include <QtGui/private/qharfbuzzng_p.h>
+#include <QtGui/private/qfontengine_p.h>
 #include <QtGui/private/qrawfont_p.h>
-#include <wtf/NakedPtr.h>
 #endif
 
 #if ENABLE(VARIATION_FONTS)
@@ -340,6 +339,237 @@ static hb_script_t findScriptForVerticalGlyphSubstitution(hb_face_t* face)
     return HB_SCRIPT_INVALID;
 }
 
+// Build HarfBuzz objects owned by WebKit using the system HarfBuzz API.
+// Do not pass Qt-private hb_font_t/hb_face_t objects to this HarfBuzz library.
+#if PLATFORM(QT)
+static hb_user_data_key_t _useDesignMetricsKey;
+
+static uint webkitQtFontGetUseDesignMetrics(hb_font_t *font)
+{
+    return quintptr(hb_font_get_user_data(font, &_useDesignMetricsKey));
+}
+
+
+static hb_bool_t
+_hb_qt_get_font_h_extents(hb_font_t * /*font*/, void *font_data,
+                          hb_font_extents_t *metrics,
+                          void * /*user_data*/)
+{
+    QFontEngine *fe = static_cast<QFontEngine *>(font_data);
+    Q_ASSERT(fe);
+
+    metrics->ascender = fe->ascent().value();
+    metrics->descender = fe->descent().value();
+    metrics->line_gap = fe->leading().value();
+
+    return true;
+}
+
+static hb_bool_t
+_hb_qt_font_get_nominal_glyph(hb_font_t * /*font*/, void *font_data,
+                              hb_codepoint_t unicode,
+                              hb_codepoint_t *glyph,
+                              void * /*user_data*/)
+{
+    QFontEngine *fe = static_cast<QFontEngine *>(font_data);
+    Q_ASSERT(fe);
+
+    *glyph = fe->glyphIndex(unicode);
+
+    return *glyph != 0;
+}
+
+static hb_bool_t
+_hb_qt_font_get_variation_glyph(hb_font_t * /*font*/, void *font_data,
+                                hb_codepoint_t unicode, hb_codepoint_t /*variation_selector*/,
+                                hb_codepoint_t *glyph,
+                                void * /*user_data*/)
+{
+    QFontEngine *fe = static_cast<QFontEngine *>(font_data);
+    Q_ASSERT(fe);
+
+    // ### TODO add support for variation selectors
+    *glyph = fe->glyphIndex(unicode);
+
+    return *glyph != 0;
+}
+
+static hb_position_t
+_hb_qt_font_get_glyph_h_advance(hb_font_t *font, void *font_data,
+                                hb_codepoint_t glyph,
+                                void * /*user_data*/)
+{
+    QFontEngine *fe = static_cast<QFontEngine *>(font_data);
+    Q_ASSERT(fe);
+
+    QFixed advance;
+
+    QGlyphLayout g;
+    g.numGlyphs = 1;
+    g.glyphs = &glyph;
+    g.advances = &advance;
+
+    fe->recalcAdvances(&g, QFontEngine::ShaperFlags(webkitQtFontGetUseDesignMetrics(font)));
+
+    return advance.value();
+}
+
+static hb_position_t
+_hb_qt_font_get_glyph_h_kerning(hb_font_t *font, void *font_data,
+                                hb_codepoint_t first_glyph, hb_codepoint_t second_glyph,
+                                void * /*user_data*/)
+{
+    QFontEngine *fe = static_cast<QFontEngine *>(font_data);
+    Q_ASSERT(fe);
+
+    glyph_t glyphs[2] = { first_glyph, second_glyph };
+    QFixed advances[2];
+
+    QGlyphLayout g;
+    g.numGlyphs = 2;
+    g.glyphs = glyphs;
+    g.advances = advances;
+
+    fe->doKerning(&g, QFontEngine::ShaperFlags(webkitQtFontGetUseDesignMetrics(font)));
+
+    return advances[0].value();
+}
+
+static hb_bool_t
+_hb_qt_font_get_glyph_extents(hb_font_t * /*font*/, void *font_data,
+                              hb_codepoint_t glyph,
+                              hb_glyph_extents_t *extents,
+                              void * /*user_data*/)
+{
+    QFontEngine *fe = static_cast<QFontEngine *>(font_data);
+    Q_ASSERT(fe);
+
+    glyph_metrics_t gm = fe->boundingBox(glyph);
+
+    extents->x_bearing = gm.x.value();
+    extents->y_bearing = gm.y.value();
+    extents->width = gm.width.value();
+    extents->height = gm.height.value();
+
+    return true;
+}
+
+static hb_bool_t
+_hb_qt_font_get_glyph_contour_point(hb_font_t * /*font*/, void *font_data,
+                                    hb_codepoint_t glyph,
+                                    unsigned int point_index, hb_position_t *x, hb_position_t *y,
+                                    void * /*user_data*/)
+{
+    QFontEngine *fe = static_cast<QFontEngine *>(font_data);
+    Q_ASSERT(fe);
+
+    QFixed xpos, ypos;
+    quint32 numPoints = 1;
+    if (Q_LIKELY(fe->getPointInOutline(glyph, 0, point_index, &xpos, &ypos, &numPoints) == 0)) {
+        *x = xpos.value();
+        *y = ypos.value();
+        return true;
+    }
+
+    *x = *y = 0;
+    return false;
+}
+
+
+struct _hb_qt_font_funcs_t {
+    _hb_qt_font_funcs_t()
+    {
+        funcs = hb_font_funcs_create();
+
+        hb_font_funcs_set_font_h_extents_func(funcs, _hb_qt_get_font_h_extents, NULL, NULL);
+        hb_font_funcs_set_nominal_glyph_func(funcs, _hb_qt_font_get_nominal_glyph, NULL, NULL);
+        hb_font_funcs_set_variation_glyph_func(funcs, _hb_qt_font_get_variation_glyph, NULL, NULL);
+        hb_font_funcs_set_glyph_h_advance_func(funcs, _hb_qt_font_get_glyph_h_advance, NULL, NULL);
+        hb_font_funcs_set_glyph_h_kerning_func(funcs, _hb_qt_font_get_glyph_h_kerning, NULL, NULL);
+        hb_font_funcs_set_glyph_extents_func(funcs, _hb_qt_font_get_glyph_extents, NULL, NULL);
+        hb_font_funcs_set_glyph_contour_point_func(funcs, _hb_qt_font_get_glyph_contour_point, NULL, NULL);
+
+        hb_font_funcs_make_immutable(funcs);
+    }
+    ~_hb_qt_font_funcs_t()
+    {
+        hb_font_funcs_destroy(funcs);
+    }
+
+    hb_font_funcs_t *funcs;
+};
+
+static _hb_qt_font_funcs_t qt_ffuncs;
+
+static hb_blob_t *
+_hb_qt_reference_table(hb_face_t * /*face*/, hb_tag_t tag, void *user_data)
+{
+    QFontEngine::FaceData *data = static_cast<QFontEngine::FaceData *>(user_data);
+    Q_ASSERT(data);
+
+    qt_get_font_table_func_t get_font_table = data->get_font_table;
+    Q_ASSERT(get_font_table);
+
+    uint length = 0;
+    if (Q_UNLIKELY(!get_font_table(data->user_data, tag, 0, &length)))
+        return hb_blob_get_empty();
+
+    if (!length)
+        return hb_blob_get_empty();
+
+    char *buffer = static_cast<char *>(malloc(length));
+    if (q_check_ptr(buffer) == nullptr)
+        return nullptr;
+
+    if (Q_UNLIKELY(!get_font_table(data->user_data, tag, reinterpret_cast<uchar *>(buffer), &length))) {
+        free(buffer);
+        return nullptr;
+    }
+
+    return hb_blob_create(const_cast<const char *>(buffer), length,
+                          HB_MEMORY_MODE_WRITABLE,
+                          buffer, free);
+}
+
+static inline hb_face_t *
+webkitQtCreateHarfBuzzFace(QFontEngine *fe)
+{
+    QFontEngine::FaceData *data = static_cast<QFontEngine::FaceData *>(malloc(sizeof(QFontEngine::FaceData)));
+    Q_CHECK_PTR(data);
+    data->user_data = fe->faceData.user_data;
+    data->get_font_table = fe->faceData.get_font_table;
+
+    hb_face_t *face = hb_face_create_for_tables(_hb_qt_reference_table, (void *)data, free);
+    
+    hb_face_set_index(face, fe->faceId().index);
+    hb_face_set_upem(face, fe->emSquareSize().truncate());
+
+    return face;
+}
+
+
+static inline hb_font_t *
+webkitQtCreateHarfBuzzFont(QFontEngine *fe)
+{
+    //Hopefully will minimise memory leaking by using HbUniquePtr here.
+    HbUniquePtr<hb_face_t> face(webkitQtCreateHarfBuzzFace(fe));
+
+    hb_font_t *font = hb_font_create(face.get());
+
+    const qreal y_ppem = fe->fontDef.pixelSize;
+    const qreal x_ppem = (fe->fontDef.pixelSize * fe->fontDef.stretch) / 100.0;
+
+    hb_font_set_funcs(font, qt_ffuncs.funcs, fe, nullptr);
+    hb_font_set_scale(font, QFixed::fromReal(x_ppem).value(), -QFixed::fromReal(y_ppem).value());
+    hb_font_set_ppem(font, int(x_ppem), int(y_ppem));
+
+    hb_font_set_ptem(font, fe->fontDef.pointSize);
+
+    return font;
+}
+
+#endif // PLATFORM(QT)
+
 void ComplexTextController::collectComplexTextRunsForCharacters(std::span<const UChar> characters, unsigned stringLocation, const Font* font)
 {
     if (!font) {
@@ -399,21 +629,15 @@ void ComplexTextController::collectComplexTextRunsForCharacters(std::span<const 
     hb_font_make_immutable(harfBuzzFont.get());
 #elif PLATFORM(QT)
     const QRawFont& rawFont = fontPlatformData.rawFont();
-    QFontEngine* fe = QRawFontPrivate::get(rawFont)->fontEngine;
-    //qDebug() << Q_FUNC_INFO << __LINE__ << fe << fe->type();
-    hb_font_t* fnt = hb_qt_font_get_for_engine(fe);
-    //qDebug() << Q_FUNC_INFO << __LINE__ << "hb_qt_font_get_for_engine" << fnt;
-    //qDebug() << Q_FUNC_INFO << __LINE__ << hb_font_get_face(fnt);
+    auto* rawFontPrivate = QRawFontPrivate::get(rawFont);
+    QFontEngine* fe = rawFontPrivate ? rawFontPrivate->fontEngine : nullptr;
+    if (!fe || fe->type() == QFontEngine::Multi)
+        return;
 
-//    qDebug() << Q_FUNC_INFO << __LINE__ << fe->harfbuzzFace();
-    //qDebug() << Q_FUNC_INFO << __LINE__ << "hb_qt_face_get_for_engine" << hb_qt_face_get_for_engine(fe);
-//    qDebug() << Q_FUNC_INFO << __LINE__ << hb_qt_font_get_for_engine(fe);
-//    qDebug() << Q_FUNC_INFO << __LINE__ << hb_font_get_face(hb_qt_font_get_for_engine(fe));
-    NakedPtr<hb_face_t> face(hb_qt_face_get_for_engine(fe));
-    NakedPtr<hb_font_t> harfBuzzFont(hb_qt_font_get_for_engine(fe));
-//    qDebug() << Q_FUNC_INFO << __LINE__ << face.get();
-//    qDebug() << Q_FUNC_INFO << __LINE__ << harfBuzzFont.get();
-//    qDebug() << Q_FUNC_INFO << __LINE__ << hb_font_get_face(harfBuzzFont.get());
+    // Both objects are constructed by the HarfBuzz library that will shape the text.
+    // A single font/face pair is used for the entire synchronous shaping operation.
+    HbUniquePtr<hb_font_t> harfBuzzFont(webkitQtCreateHarfBuzzFont(fe));
+    HbUniquePtr<hb_face_t> face(hb_face_reference(hb_font_get_face(harfBuzzFont.get())));
 #endif
 
     auto features = fontFeatures(m_fontCascade, fontPlatformData);

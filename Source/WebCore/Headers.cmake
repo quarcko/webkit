@@ -2565,6 +2565,8 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
     platform/video-codecs/VideoCodecType.h
 
     platform/xr/PlatformXR.h
+    
+    platform/qt/PlatformGestureEvent.h
 
     plugins/PluginData.h
     plugins/PluginInfoProvider.h

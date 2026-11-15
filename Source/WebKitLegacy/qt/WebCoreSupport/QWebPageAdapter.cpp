@@ -115,6 +115,7 @@
 #include <WebCore/WebLockRegistry.h>
 #include <WebCore/WebRTCProvider.h>
 #include <WebCore/WindowFeatures.h>
+#include <WebCore/RemoteFrameGeometryTransformer.h>
 #include <WebCore/markup.h>
 #include <wtf/UniqueRef.h>
 
@@ -139,6 +140,11 @@
 
 #if ENABLE(VIDEO)
 #include <WebCore/HTMLMediaElement.h>
+#endif
+
+#if ENABLE(TOUCH_EVENTS)
+#include <WebCore/LocalFrame.h>
+#include <WebCore/PlatformTouchEvent.h>
 #endif
 
 // from text/qfont.cpp
@@ -1583,20 +1589,19 @@ bool QWebPageAdapter::handleShortcutOverrideEvent(QKeyEvent* event)
 bool QWebPageAdapter::touchEvent(QTouchEvent* event)
 {
 #if ENABLE(TOUCH_EVENTS)
-    Frame* frame = mainFrameAdapter().frame;
-    if (!frame->view() || !frame->document())
+    auto* frame = mainFrameAdapter().frame;
+
+    if (!frame || !frame->view() || !frame->document())
         return false;
 
-    // If the document doesn't have touch-event handles, we just ignore it
-    // and let QGuiApplication convert it to a mouse event.
     if (!frame->document()->hasTouchEventHandlers())
         return false;
 
-    // Always accept the QTouchEvent so that we'll receive also TouchUpdate and TouchEnd events
     event->setAccepted(true);
 
-    // Return whether the default action was cancelled in the JS event handler
-    return frame->eventHandler().handleTouchEvent(convertTouchEvent(event));
+    return frame->eventHandler()
+        .handleTouchEvent(convertTouchEvent(event))
+        .value_or(false);
 #else
     event->ignore();
     return false;

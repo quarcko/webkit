@@ -44,8 +44,6 @@ public:
 
     static RefPtr<GestureEvent> create(AbstractView*, const PlatformGestureEvent&);
 
-    EventInterface eventInterface() const override;
-
 private:
     GestureEvent(const AtomString& type, MonotonicTime timestamp, AbstractView*, int screenX, int screenY, int clientX, int clientY, OptionSet<Modifier> modifiers);
 };

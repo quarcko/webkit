@@ -181,7 +181,7 @@ WebKitPlatformTouchEvent::WebKitPlatformTouchEvent(QTouchEvent* event)
         break;
     }
 
-    const QList<QTouchEvent::TouchPoint>& points = event->touchPoints();
+    const QList<QTouchEvent::TouchPoint>& points = event->points();
     for (int i = 0; i < points.count(); ++i) {
         PlatformTouchPoint::State state = PlatformTouchPoint::TouchStateEnd;
 
@@ -210,7 +210,7 @@ WebKitPlatformTouchEvent::WebKitPlatformTouchEvent(QTouchEvent* event)
 
     m_modifiers = mouseEventModifiersFromQtKeyboardModifiers(event->modifiers());
 
-    m_timestamp = WTF::currentTime();
+    m_timestamp = WTF::WallTime::now();
 }
 
 WebKitPlatformTouchPoint::WebKitPlatformTouchPoint(const QTouchEvent::TouchPoint& point, State state)
@@ -218,13 +218,13 @@ WebKitPlatformTouchPoint::WebKitPlatformTouchPoint(const QTouchEvent::TouchPoint
     // The QTouchEvent::TouchPoint API states that ids will be >= 0.
     m_id = point.id();
     m_state = state;
-    m_screenPos = point.screenPos().toPoint();
-    m_pos = point.pos().toPoint();
+    m_screenPos = point.globalPosition().toPoint();
+    m_pos = point.position().toPoint();
     // Qt reports touch point size as rectangles, but we will pretend it is an oval.
-    QRect touchRect = point.rect().toAlignedRect();
-    if (touchRect.isValid()) {
-        m_radiusX = point.rect().width() / 2;
-        m_radiusY = point.rect().height() / 2;
+    QSizeF touchSize = point.ellipseDiameters();
+    if (!touchSize.isEmpty()) {
+        m_radiusX = touchSize.width() / 2;
+        m_radiusY = touchSize.height() / 2;
     } else {
         // http://www.w3.org/TR/2011/WD-touch-events-20110505: 1 if no value is known.
         m_radiusX = 1;
@@ -259,7 +259,7 @@ WebKitPlatformGestureEvent::WebKitPlatformGestureEvent(QGestureEventFacade* even
     m_type = toPlatformEventType(event->type);
     m_globalPosition = event->globalPos;
     m_position = event->pos;
-    m_timestamp = WTF::currentTime();
+    m_timestamp = WTF::WallTime::now();
 }
 
 #endif
