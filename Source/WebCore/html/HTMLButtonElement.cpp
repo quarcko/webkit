@@ -38,6 +38,7 @@
 #include <wtf/SetForScope.h>
 #include <wtf/StdLibExtras.h>
 #include <wtf/TZoneMallocInlines.h>
+#include "ContainerNodeInlines.h"
 
 #if ENABLE(SERVICE_CONTROLS)
 #include "ImageControlsMac.h"

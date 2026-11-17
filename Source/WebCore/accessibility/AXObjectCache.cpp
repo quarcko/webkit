@@ -5814,6 +5814,9 @@ AXTextChange AXObjectCache::textChangeForEditType(AXTextEditType type)
         ASSERT_NOT_REACHED();
         return AXTextChange::Inserted;
     }
+    
+    ASSERT_NOT_REACHED();
+    return AXTextChange::Inserted;
 }
 #endif
 

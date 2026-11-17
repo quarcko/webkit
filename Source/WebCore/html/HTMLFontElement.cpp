@@ -36,6 +36,7 @@
 #include <wtf/text/ParsingUtilities.h>
 #include <wtf/text/StringBuilder.h>
 #include <wtf/text/StringToIntegerConversion.h>
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

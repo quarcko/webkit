@@ -26,6 +26,7 @@
 #include "CSSPropertyNames.h"
 #include "HTMLNames.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "CSSValueKeywords.h"
 
 namespace WebCore {
 

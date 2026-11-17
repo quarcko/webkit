@@ -27,6 +27,8 @@
 #include "SVGParserUtilities.h"
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/StringToIntegerConversion.h>
+#include "SVGPropertyOwnerRegistry.h"
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

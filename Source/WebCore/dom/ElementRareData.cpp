@@ -30,6 +30,7 @@
 
 #include "config.h"
 #include "ElementRareData.h"
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

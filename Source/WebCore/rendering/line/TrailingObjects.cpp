@@ -27,6 +27,7 @@
 
 #include "LegacyInlineIterator.h"
 #include "RenderStyleInlines.h"
+#include "RenderElementInlines.h"
 
 namespace WebCore {
 

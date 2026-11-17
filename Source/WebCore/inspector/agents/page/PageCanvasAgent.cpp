@@ -45,6 +45,8 @@
 #include "LocalFrame.h"
 #include "Page.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "NodeInlines.h" 
+#include "DocumentInlines.h"
 
 #if ENABLE(OFFSCREEN_CANVAS)
 #include "OffscreenCanvas.h"

@@ -107,7 +107,10 @@ LONG WINAPI vectoredHandler(struct _EXCEPTION_POINTERS *exceptionInfo)
 
     PlatformRegisters& registers = *(exceptionInfo->ContextRecord);
 
-    long result = EXCEPTION_EXECUTE_HANDLER;
+    // Vectored handlers must continue searching unless a registered handler
+    // handled the exception. EXCEPTION_EXECUTE_HANDLER is an SEH filter result,
+    // not a supported return value for a vectored exception handler.
+    LONG result = EXCEPTION_CONTINUE_SEARCH;
     handlers.forEachHandler(signal, [&] (const SignalHandler& handler) {
         switch (handler(signal, sigInfo, registers)) {
         case SignalAction::Handled:

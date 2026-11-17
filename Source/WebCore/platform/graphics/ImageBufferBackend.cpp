@@ -31,6 +31,7 @@
 #include "PixelBuffer.h"
 #include "PixelBufferConversion.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "NativeImage.h"
 
 namespace WebCore {
 

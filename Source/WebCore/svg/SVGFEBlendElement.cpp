@@ -27,6 +27,7 @@
 #include "NodeName.h"
 #include "SVGNames.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "SVGPropertyOwnerRegistry.h"
 
 namespace WebCore {
 

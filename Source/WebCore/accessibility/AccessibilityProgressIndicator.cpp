@@ -30,6 +30,8 @@
 #include "RenderMeter.h"
 #include "RenderObject.h"
 #include "RenderProgress.h"
+#include "ContainerNodeInlines.h"
+#include "PositionInlines.h"
 
 namespace WebCore {
     

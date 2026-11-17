@@ -393,7 +393,11 @@ static ALWAYS_INLINE bool isEdgeCase(double x)
 static ALWAYS_INLINE double mathPowInternal(double x, double y)
 {
     if (!isDenormal(x) && !isDenormal(y)) {
+#if PLATFORM(QT) && COMPILER(MINGW64) && defined(pow)
+        double libmResult = pow(x, y);
+#else
         double libmResult = std::pow(x, y);
+#endif
         if (libmResult || isEdgeCase(x) || isEdgeCase(y))
             return libmResult;
     }
@@ -533,11 +537,19 @@ JSC_DEFINE_NOEXCEPT_JIT_OPERATION(sqrtFloat, float, (float value))
 
 JSC_DEFINE_NOEXCEPT_JIT_OPERATION(stdPowDouble, double, (double x, double y))
 {
+#if PLATFORM(QT) && COMPILER(MINGW64) && defined(pow)
+    return pow(x, y);
+#else
     return std::pow(x, y);
+#endif
 }
 JSC_DEFINE_NOEXCEPT_JIT_OPERATION(stdPowFloat, float, (float x, float y))
 {
+#if PLATFORM(QT) && COMPILER(MINGW64) && defined(pow)
+    return pow(x, y);
+#else
     return std::pow(x, y);
+#endif
 }
 
 JSC_DEFINE_NOEXCEPT_JIT_OPERATION(fmodDouble, double, (double x, double y))

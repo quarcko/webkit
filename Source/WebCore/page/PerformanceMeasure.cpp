@@ -27,6 +27,7 @@
 #include "PerformanceMeasure.h"
 
 #include "SerializedScriptValue.h"
+#include "ExceptionOr.h"
 
 namespace WebCore {
 

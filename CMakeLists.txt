@@ -9,6 +9,12 @@
 cmake_minimum_required(VERSION 3.20)
 project(WebKit)
 
+# Work around GCC x86-64 stack realignment / SEH issues on MinGW.
+# Keep Linux GCC and Windows MSVC unchanged.
+if (MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    add_compile_options("$<$<COMPILE_LANGUAGE:C,CXX>:-mno-stackrealign>")
+endif ()
+
 # -----------------------------------------------------------------------------
 # Common configuration
 #------------------------------------------------------------------------------

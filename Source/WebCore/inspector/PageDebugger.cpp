@@ -44,6 +44,7 @@
 #include <wtf/RunLoop.h>
 #include <wtf/StdLibExtras.h>
 #include <wtf/TZoneMallocInlines.h>
+#include "LocalFrameInlines.h"
 
 #if PLATFORM(IOS_FAMILY)
 #include "WebCoreThreadInternal.h"

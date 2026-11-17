@@ -40,6 +40,7 @@
 #include "ResourceResponse.h"
 #include "ResourceTiming.h"
 #include <wtf/URL.h>
+#include "ContextDestructionObserverInlines.h"
 
 namespace WebCore {
 

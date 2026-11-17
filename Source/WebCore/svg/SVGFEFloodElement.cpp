@@ -28,6 +28,8 @@
 #include "SVGNames.h"
 #include "SVGRenderStyle.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "SVGPropertyOwnerRegistry.h"
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

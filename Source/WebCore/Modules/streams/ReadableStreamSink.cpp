@@ -32,6 +32,7 @@
 #include "ReadableStream.h"
 #include "SharedBuffer.h"
 #include <JavaScriptCore/Uint8Array.h>
+#include "ExceptionOr.h"
 
 namespace WebCore {
 

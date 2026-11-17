@@ -32,6 +32,7 @@
 #include <wtf/text/MakeString.h>
 #include <wtf/text/StringParsingBuffer.h>
 #include <wtf/text/TextStream.h>
+#include "CSSPrimitiveValue.h"
 
 namespace WebCore {
 

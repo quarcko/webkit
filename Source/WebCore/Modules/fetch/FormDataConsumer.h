@@ -35,6 +35,7 @@
 
 namespace WebCore {
 
+class Exception;
 class BlobLoader;
 class FormData;
 class ScriptExecutionContext;

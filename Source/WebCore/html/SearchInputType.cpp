@@ -45,6 +45,7 @@
 #include "TextControlInnerElements.h"
 #include "UserAgentParts.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

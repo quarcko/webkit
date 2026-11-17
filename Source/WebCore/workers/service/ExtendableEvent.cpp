@@ -31,6 +31,8 @@
 #include "ScriptExecutionContext.h"
 #include <JavaScriptCore/Microtask.h>
 #include <wtf/TZoneMallocInlines.h>
+#include "ExceptionOr.h"
+#include "EventLoop.h"
 
 namespace WebCore {
 

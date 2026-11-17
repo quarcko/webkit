@@ -29,6 +29,7 @@
 #include "XLinkNames.h"
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/AtomString.h>
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

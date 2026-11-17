@@ -33,6 +33,7 @@
 #include "FileList.h"
 #include "Pasteboard.h"
 #include "Settings.h"
+#include "ExceptionOr.h"
 #include <wtf/TZoneMallocInlines.h>
 
 namespace WebCore {

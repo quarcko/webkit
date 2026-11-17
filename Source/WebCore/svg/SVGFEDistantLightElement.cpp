@@ -24,6 +24,7 @@
 #include "DistantLightSource.h"
 #include "SVGNames.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

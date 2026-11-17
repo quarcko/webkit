@@ -33,6 +33,7 @@
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/AtomStringHash.h>
 #include <wtf/text/StringBuilder.h>
+#include "NodeInlines.h"
 
 namespace WebCore {
 

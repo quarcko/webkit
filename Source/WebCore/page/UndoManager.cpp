@@ -33,6 +33,8 @@
 #include "LocalFrame.h"
 #include "UndoItem.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "ExceptionOr.h"
+#include "LocalFrameInlines.h"
 
 namespace WebCore {
 

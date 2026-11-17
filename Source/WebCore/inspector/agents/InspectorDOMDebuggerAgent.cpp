@@ -50,6 +50,8 @@
 #include <JavaScriptCore/RegularExpression.h>
 #include <wtf/JSONValues.h>
 #include <wtf/TZoneMallocInlines.h>
+#include "EventTargetInlines.h"
+#include "LocalFrameInlines.h"
 
 namespace WebCore {
 

@@ -39,6 +39,7 @@
 #include "StyleCachedImage.h"
 #include <wtf/RobinHoodHashSet.h>
 #include <wtf/TZoneMallocInlines.h>
+#include "RenderElementInlines.h"
 
 #if ENABLE(TREE_DEBUGGING)
 #include <stdio.h>

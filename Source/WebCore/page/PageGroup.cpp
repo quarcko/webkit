@@ -36,6 +36,8 @@
 #include <JavaScriptCore/StructureInlines.h>
 #include <wtf/StdLibExtras.h>
 #include <wtf/TZoneMallocInlines.h>
+#include "LocalFrameInlines.h"
+#include "FrameInlines.h"
 
 #if ENABLE(VIDEO)
 #if PLATFORM(MAC) || HAVE(MEDIA_ACCESSIBILITY_FRAMEWORK)

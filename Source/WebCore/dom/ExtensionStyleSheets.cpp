@@ -45,6 +45,8 @@
 #include "UserContentURLPattern.h"
 #include "UserStyleSheet.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "Document.h"
+#include "DocumentInlines.h"
 
 namespace WebCore {
 

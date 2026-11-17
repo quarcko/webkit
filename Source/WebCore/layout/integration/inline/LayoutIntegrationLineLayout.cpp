@@ -56,6 +56,7 @@
 #include "ShapeOutsideInfo.h"
 #include <wtf/Assertions.h>
 #include <wtf/Range.h>
+#include "SVGTextFragment.h"
 
 namespace WebCore {
 namespace LayoutIntegration {

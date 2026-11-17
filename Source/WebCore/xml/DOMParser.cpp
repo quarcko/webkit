@@ -27,6 +27,8 @@
 #include "SecurityOriginPolicy.h"
 #include "TrustedType.h"
 #include "XMLDocument.h"
+#include "Settings.h"
+#include "DocumentInlines.h"
 
 namespace WebCore {
 

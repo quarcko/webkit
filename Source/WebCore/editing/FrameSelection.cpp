@@ -90,6 +90,8 @@
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/CString.h>
 #include <wtf/text/TextStream.h>
+#include "ContainerNodeInlines.h"
+#include "BoundaryPointInlines.h"
 
 #if PLATFORM(IOS_FAMILY)
 #include "Chrome.h"

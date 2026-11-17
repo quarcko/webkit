@@ -34,6 +34,7 @@
 #include "Page.h"
 #include <wtf/NeverDestroyed.h>
 #include <wtf/TZoneMallocInlines.h>
+#include "DocumentInlines.h"
 
 namespace WebCore {
 

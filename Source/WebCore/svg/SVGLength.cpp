@@ -27,6 +27,7 @@
 #include "SVGLength.h"
 
 #include "SVGElement.h"
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

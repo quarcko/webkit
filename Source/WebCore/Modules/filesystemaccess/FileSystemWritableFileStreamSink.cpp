@@ -35,6 +35,10 @@
 #include <JavaScriptCore/JSArrayBufferView.h>
 #include <JavaScriptCore/JSString.h>
 
+#include "Exception.h"
+#include "ExceptionOr.h"
+#include <wtf/CompletionHandler.h>
+
 namespace WebCore {
 
 static ExceptionOr<FileSystemWritableFileStream::WriteParams> writeParamsFromChunk(FileSystemWritableFileStream::ChunkType&& chunk)

@@ -1016,8 +1016,8 @@ css/calc/CSSCalcTree+Copy.cpp
 css/calc/CSSCalcTree+Evaluation.cpp
 css/calc/CSSCalcTree+MediaProgressEvaluator.cpp
 css/calc/CSSCalcTree+Parser.cpp
-css/calc/CSSCalcTree+Serialization.cpp
-css/calc/CSSCalcTree+Simplification.cpp
+css/calc/CSSCalcTree+Serialization.cpp @no-unify
+css/calc/CSSCalcTree+Simplification.cpp @no-unify
 css/calc/CSSCalcTree.cpp
 css/calc/CSSCalcType.cpp
 css/calc/CSSCalcValue.cpp

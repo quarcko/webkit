@@ -31,6 +31,7 @@
 #include "SVGNames.h"
 #include <wtf/StdLibExtras.h>
 #include <wtf/TZoneMallocInlines.h>
+#include "SVGPropertyOwnerRegistry.h"
 
 namespace WebCore {
 

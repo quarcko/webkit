@@ -29,6 +29,7 @@
 #include "URLPatternParser.h"
 #include <unicode/utf16.h>
 #include <wtf/text/MakeString.h>
+#include "ExceptionOr.h"
 
 namespace WebCore {
 namespace URLPatternUtilities {

@@ -56,6 +56,7 @@
 #include <JavaScriptCore/JSFunction.h>
 #include <JavaScriptCore/Lookup.h>
 #include <JavaScriptCore/Structure.h>
+#include <JavaScriptCore/ConsoleTypes.h>
 
 #if ENABLE(USER_MESSAGE_HANDLERS)
 #include "JSWebKitNamespace.h"

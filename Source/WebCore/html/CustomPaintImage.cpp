@@ -46,6 +46,7 @@
 #include "RenderElement.h"
 #include "StyleExtractor.h"
 #include <JavaScriptCore/ConstructData.h>
+#include "RenderElementInlines.h"
 
 namespace WebCore {
 

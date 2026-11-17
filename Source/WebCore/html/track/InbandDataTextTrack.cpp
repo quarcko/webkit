@@ -34,6 +34,7 @@
 #include "InbandTextTrackPrivate.h"
 #include "TextTrackList.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "Document.h"
 
 namespace WebCore {
 

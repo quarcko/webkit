@@ -37,6 +37,7 @@
 #include "RenderView.h"
 #include "StyleRule.h"
 #include "StyleScope.h"
+#include "ContainerNodeInlines.h"
 
 namespace WebCore::Style {
 

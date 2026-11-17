@@ -53,6 +53,7 @@
 #include <wtf/text/CString.h>
 #include <wtf/text/MakeString.h>
 #include <wtf/text/StringBuilder.h>
+#include "ContextDestructionObserverInlines.h"
 
 #if PLATFORM(IOS_FAMILY)
 #include "WebCoreThread.h"

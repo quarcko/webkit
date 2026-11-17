@@ -42,6 +42,7 @@
 #include "VideoTrackPrivate.h"
 #include <wtf/NeverDestroyed.h>
 #include <wtf/TZoneMallocInlines.h>
+#include "ContextDestructionObserverInlines.h"
 
 #if ENABLE(MEDIA_SOURCE)
 #include "SourceBuffer.h"

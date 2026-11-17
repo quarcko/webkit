@@ -29,6 +29,7 @@
 #include "CryptoAlgorithmRegistry.h"
 #include "JsonWebKey.h"
 #include <wtf/text/Base64.h>
+#include "ExceptionOr.h"
 
 namespace WebCore {
 

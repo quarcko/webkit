@@ -372,7 +372,7 @@ public:
     bool contentfulPaintDetected() const { return m_contentfulPaintDetected; }
 
     // FIXME: Nothing in this section belongs here, and should be moved elsewhere.
-#if OS(WINDOWS)
+#if OS(WINDOWS) && !PLATFORM(QT)
     HDC getWindowsContext(const IntRect&, bool supportAlphaBlend); // The passed in rect is used to create a bitmap for compositing inside transparency layers.
     void releaseWindowsContext(HDC, const IntRect&, bool supportAlphaBlend); // The passed in HDC should be the one handed back by getWindowsContext.
 #endif

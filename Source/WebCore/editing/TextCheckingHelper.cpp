@@ -40,6 +40,7 @@
 #include <unicode/ubrk.h>
 #include <wtf/text/StringView.h>
 #include <wtf/text/TextBreakIterator.h>
+#include "BoundaryPointInlines.h"
 
 namespace WebCore {
 

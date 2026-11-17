@@ -29,6 +29,7 @@
 #include "LocalizedStrings.h"
 #include "Page.h"
 #include "PluginInfoProvider.h"
+#include "LocalFrameInlines.h"
 
 namespace WebCore {
 

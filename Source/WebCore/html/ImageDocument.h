@@ -28,6 +28,7 @@
 
 namespace WebCore {
 
+class LayoutSize;
 class ImageDocumentElement;
 class HTMLImageElement;
 

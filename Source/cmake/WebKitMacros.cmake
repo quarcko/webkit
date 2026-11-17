@@ -17,6 +17,12 @@ macro(WEBKIT_COMPUTE_SOURCES _framework)
     if (MSVC AND ${_framework} STREQUAL "WebCore" AND ${_framework}_LIBRARY_TYPE STREQUAL "STATIC")
         list(APPEND gusb_args --max-bundle-size 16)
     endif ()
+    
+    # Keep PE/COFF section-name string tables below the MinGW
+    # assembler limit for large WebCore template-heavy sources.
+    if (MINGW AND "${_framework}" STREQUAL "WebCore")
+        list(APPEND gusb_args --max-bundle-size 2)
+    endif ()
 
     if (ENABLE_UNIFIED_BUILDS)
         execute_process(COMMAND ${RUBY_EXECUTABLE} ${WTF_SCRIPTS_DIR}/generate-unified-source-bundles.rb

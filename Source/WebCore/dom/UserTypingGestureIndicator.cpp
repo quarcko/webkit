@@ -29,6 +29,7 @@
 #include "Element.h"
 #include "LocalFrame.h"
 #include <wtf/NeverDestroyed.h>
+#include "Document.h"
 
 namespace WebCore {
 

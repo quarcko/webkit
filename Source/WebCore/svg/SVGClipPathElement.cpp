@@ -38,6 +38,7 @@
 #include "StyleResolver.h"
 #include <wtf/NeverDestroyed.h>
 #include <wtf/TZoneMallocInlines.h>
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

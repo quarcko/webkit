@@ -84,6 +84,7 @@
 #include <wtf/StackStats.h>
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/TextStream.h>
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

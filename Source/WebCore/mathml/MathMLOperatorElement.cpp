@@ -34,6 +34,7 @@
 #include "RenderMathMLOperator.h"
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/unicode/CharacterNames.h>
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

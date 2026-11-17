@@ -42,6 +42,10 @@
 #include "UserAgentParts.h"
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/StringBuilder.h>
+#include "CSSPropertyNames.h"
+#include "CSSUnits.h"
+#include "ExceptionOr.h"
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

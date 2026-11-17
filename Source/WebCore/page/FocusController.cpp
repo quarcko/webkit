@@ -60,6 +60,10 @@
 #include <limits>
 #include <wtf/Ref.h>
 #include <wtf/TZoneMallocInlines.h>
+#include "PopoverData.h"
+#include "HTMLImageElement.h"
+#include "ElementRareData.h"
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

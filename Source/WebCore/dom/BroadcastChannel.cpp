@@ -26,6 +26,7 @@
 #include "config.h"
 #include "BroadcastChannel.h"
 
+#include "Document.h"
 #include "BroadcastChannelRegistry.h"
 #include "EventNames.h"
 #include "EventTargetInlines.h"

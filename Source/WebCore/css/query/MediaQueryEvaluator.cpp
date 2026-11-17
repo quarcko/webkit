@@ -32,6 +32,7 @@
 #include "MediaQueryFeatures.h"
 #include "RenderView.h"
 #include "StyleFontSizeFunctions.h"
+#include "DocumentInlines.h"
 
 namespace WebCore {
 namespace MQ {

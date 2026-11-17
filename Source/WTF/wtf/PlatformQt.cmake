@@ -14,19 +14,23 @@ list(APPEND WTF_SOURCES
 QTWEBKIT_GENERATE_MOC_FILES_CPP(WTF qt/MainThreadQt.cpp qt/RunLoopQt.cpp)
 
 if (WIN32)
-    list(APPEND WTF_PUBLIC_HEADERS
-        text/win/WCharStringEXtras.h
-    )
+    # Windows public headers are already listed in wtf/CMakeLists.txt.
     list(APPEND WTF_SOURCES
         text/win/StringWin.cpp
 
         win/DbgHelperWin.cpp
+        win/FileHandleWin.cpp
         win/FileSystemWin.cpp
+        win/LoggingWin.cpp
+        win/MappedFileDataWin.cpp
         win/OSAllocatorWin.cpp
         win/PathWalker.cpp
-        win/ThreadSpecificWin.cpp
         win/ThreadingWin.cpp
     )
+    # Retain this source on snapshots that still provide a separate TLS backend.
+    if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/win/ThreadSpecificWin.cpp")
+        list(APPEND WTF_SOURCES win/ThreadSpecificWin.cpp)
+    endif ()
     list(APPEND WTF_LIBRARIES
         dbghelp
         shlwapi
@@ -77,7 +81,7 @@ if (QT_STATIC_BUILD)
     )
 endif ()
 
-if (USE_UNIX_DOMAIN_SOCKETS)
+if (USE_UNIX_DOMAIN_SOCKETS AND NOT WIN32)
     list(APPEND WTF_SOURCES
         qt/WorkQueueQt.cpp
 
@@ -116,7 +120,10 @@ endif ()
 if (WIN32)
     list(APPEND WTF_SOURCES
         win/CPUTimeWin.cpp
-        win/WorkQueueWin.cpp
+        win/SignalsWin.cpp
+        # WorkQueueWin.cpp is no longer present. The generic queue uses the
+        # selected Qt RunLoop and maintains WebKit 622's queue thread identity.
+        generic/WorkQueueGeneric.cpp
     )
     list(APPEND WTF_LIBRARIES
         winmm
@@ -161,6 +168,7 @@ if (WIN32)
     list(APPEND WTF_SOURCES
         win/MemoryFootprintWin.cpp
         win/MemoryPressureHandlerWin.cpp
+        win/Win32Handle.cpp
     )
     list(APPEND WTF_PUBLIC_HEADERS
         win/Win32Handle.h

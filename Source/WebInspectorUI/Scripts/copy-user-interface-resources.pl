@@ -211,7 +211,14 @@ if (!$shouldCombineMain) {
 # Always refer to the copy in derived sources so the order of replacements does not matter.
 make_path($derivedSourcesDir);
 my $derivedSourcesMainHTML = File::Spec->catfile($derivedSourcesDir, 'Main.html');
-copy(File::Spec->catfile($uiRoot, 'Main.html'), File::Spec->catfile($derivedSourcesDir, 'Main.html')) or die "Copy failed: $!";
+my $sourceMainHTML = File::Spec->catfile($uiRoot, 'Main.html');
+if ($^O eq 'MSWin32' && (-e $derivedSourcesMainHTML || -l $derivedSourcesMainHTML)) {
+    my $sourcePath = File::Spec->canonpath(File::Spec->rel2abs($sourceMainHTML));
+    my $derivedPath = File::Spec->canonpath(File::Spec->rel2abs($derivedSourcesMainHTML));
+    die "Source and derived Main.html paths must differ" if lc($sourcePath) eq lc($derivedPath);
+    unlink($derivedSourcesMainHTML) or die "Cannot remove generated $derivedSourcesMainHTML: $!";
+}
+copy($sourceMainHTML, $derivedSourcesMainHTML) or die "Copy failed: $!";
 
 if (!$shouldIncludeBrowserInspectorFrontendHost) {
     system($perl, $combineResourcesCmd,

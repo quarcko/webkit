@@ -286,6 +286,17 @@ static bool isValidContextMenuAction(WebCore::ContextMenuAction action)
 #else
         return false;
 #endif
+
+#if !PLATFORM(GTK)
+    case ContextMenuAction::ContextMenuItemTagCopyImageURLToClipboard:
+    case ContextMenuAction::ContextMenuItemTagSelectAll:
+#endif
+    case ContextMenuAction::ContextMenuItemTagOpenLinkInThisWindow:
+#if PLATFORM(QT)
+        return true;
+#else
+        return false;
+#endif
     }
 
     if (action > ContextMenuAction::ContextMenuItemBaseCustomTag && action < ContextMenuAction::ContextMenuItemLastCustomTag)

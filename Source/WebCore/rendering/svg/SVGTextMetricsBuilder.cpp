@@ -26,6 +26,7 @@
 #include "RenderSVGInlineText.h"
 #include "RenderSVGText.h"
 #include <wtf/WeakPtr.h>
+#include "RenderElementInlines.h"
 
 namespace WebCore {
 

@@ -3032,6 +3032,12 @@ list(APPEND WebCoreTestSupport_SYSTEM_INCLUDE_DIRECTORIES ${WebCore_SYSTEM_INCLU
 
 WEBKIT_LIBRARY(WebCoreTestSupport)
 
+if (WIN32 AND WebCore_LIBRARY_TYPE STREQUAL "STATIC")
+    target_compile_definitions(WebCoreTestSupport PRIVATE
+        STATICALLY_LINKED_WITH_WebCore=1
+    )
+endif ()
+
 if (${WebCore_LIBRARY_TYPE} MATCHES "SHARED")
     set_target_properties(WebCore PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
     install(TARGETS WebCore DESTINATION "${LIB_INSTALL_DIR}")

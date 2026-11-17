@@ -38,6 +38,7 @@
 #include "StyleOriginatedAnimationEvent.h"
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/TextStream.h>
+#include "EventTargetInlines.h"
 
 namespace WebCore {
 

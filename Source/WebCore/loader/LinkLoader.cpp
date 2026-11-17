@@ -64,6 +64,7 @@
 #include "StyleResolver.h"
 #include "UserContentProvider.h"
 #include <wtf/text/MakeString.h>
+#include <JavaScriptCore/ConsoleTypes.h>
 
 namespace WebCore {
 

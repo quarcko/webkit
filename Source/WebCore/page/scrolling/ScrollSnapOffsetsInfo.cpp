@@ -37,6 +37,10 @@
 #include "ScrollableArea.h"
 #include "StyleScrollSnapPoints.h"
 #include <ranges>
+#include "FloatQuad.h"
+#include "IntPoint.h"
+#include "RenderObjectInlines.h"
+#include "RenderElementInlines.h"
 
 namespace WebCore {
 

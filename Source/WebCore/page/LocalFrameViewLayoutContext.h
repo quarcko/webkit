@@ -33,9 +33,11 @@
 #include <wtf/TZoneMalloc.h>
 #include <wtf/WeakHashSet.h>
 #include <wtf/WeakPtr.h>
+#include <wtf/WeakHashMap.h>
 
 namespace WebCore {
 
+enum class LayoutOptions : uint8_t;
 class Document;
 class LayoutScope;
 class LayoutSize;

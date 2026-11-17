@@ -27,6 +27,7 @@
 
 #include "CSSPageRule.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "ExceptionOr.h"
 
 namespace WebCore {
 

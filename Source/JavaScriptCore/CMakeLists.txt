@@ -427,6 +427,12 @@ set(LLIntOffsetsExtractor_FRAMEWORKS ${JavaScriptCore_FRAMEWORKS})
 set(LLIntOffsetsExtractor_DEPENDENCIES JavaScriptCore_CopyHeaders JSCBuiltins)
 WEBKIT_EXECUTABLE(LLIntOffsetsExtractor)
 
+# LLIntOffsetsExtractor only computes structure offsets.
+# It does not need JavaScriptCore DLL import/export annotations.
+if (WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_definitions(LLIntOffsetsExtractor PRIVATE JS_EXPORT_PRIVATE=)
+endif ()
+
 # The build system will execute asm.rb every time LLIntOffsetsExtractor's mtime is newer than
 # LLIntAssembly.h's mtime. The problem we have here is: asm.rb has some built-in optimization
 # that generates a checksum of the LLIntOffsetsExtractor binary, if the checksum of the new
@@ -439,7 +445,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     set(OFFLINE_ASM_ARGS --binary-format=ELF)
 endif ()
 
-if (MSVC AND NOT ENABLE_C_LOOP)
+if (WIN32 AND NOT ENABLE_C_LOOP)
     set(OFFLINE_ASM_ARGS --platform=Windows)
 endif ()
 
@@ -466,6 +472,12 @@ add_custom_command(
 # single source file, so we need to create a separate target for it.
 add_library(LowLevelInterpreterLib OBJECT llint/LowLevelInterpreter.cpp
     ${JavaScriptCore_DERIVED_SOURCES_DIR}/${LLIntOutput})
+    
+# LowLevelInterpreterLib is compiled into JavaScriptCore.
+# MinGW must treat JSC symbols as exports, not DLL imports.
+if (WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_definitions(LowLevelInterpreterLib PRIVATE BUILDING_JavaScriptCore=1)
+endif ()
 
 # WebAssembly generator
 
@@ -1529,7 +1541,11 @@ endif ()
 if (CMAKE_COMPILER_IS_GNUCXX AND GCC_OFFLINEASM_SOURCE_MAP)
     message(STATUS "Enabling asm postprocessing")
 
-    set(LowLevelInterpreter_LAUNCHER "${RUBY_EXECUTABLE} ${JavaScriptCore_SCRIPTS_SOURCES_DIR}/postprocess-asm")
+    if (MINGW)
+        set(LowLevelInterpreter_LAUNCHER "\"${RUBY_EXECUTABLE}\" \"${JavaScriptCore_SCRIPTS_SOURCES_DIR}/postprocess-asm-win\"")
+    else ()
+        set(LowLevelInterpreter_LAUNCHER "${RUBY_EXECUTABLE} ${JavaScriptCore_SCRIPTS_SOURCES_DIR}/postprocess-asm")
+    endif ()
     get_target_property(PROP_RULE_LAUNCH_COMPILE LowLevelInterpreterLib RULE_LAUNCH_COMPILE)
     if (PROP_RULE_LAUNCH_COMPILE)
         set(LowLevelInterpreter_LAUNCHER "${LowLevelInterpreter_LAUNCHER} ${PROP_RULE_LAUNCH_COMPILE}")

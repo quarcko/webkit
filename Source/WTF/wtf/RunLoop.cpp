@@ -109,9 +109,19 @@ Ref<RunLoop> RunLoop::create(ASCIILiteral threadName, ThreadType threadType, Thr
     RefPtr<RunLoop> runLoop;
     BinarySemaphore semaphore;
     Thread::create(threadName, [&] SUPPRESS_UNCOUNTED_LAMBDA_CAPTURE {
-        runLoop = &RunLoop::currentSingleton();
+        Ref<RunLoop> createdRunLoop { RunLoop::currentSingleton() };
+        runLoop = createdRunLoop.ptr();
         semaphore.signal();
-        runLoop->run();
+        // Do not access the creator's stack (runLoop or semaphore) after
+        // signalling it: create() may already have returned.
+        RunLoop::run();
+#if PLATFORM(QT) && OS(WINDOWS)
+        // This thread was created for this RunLoop. Detach its QObject/timer
+        // backend while both Qt and WTF TLS are still live, rather than
+        // relying on the cross-library order of native TLS destructors.
+        // Qt's finished hook and Holder's destructor remain idempotent.
+        createdRunLoop->threadWillExit();
+#endif
     }, threadType, qos)->detach();
     semaphore.wait();
     return runLoop.releaseNonNull();

@@ -35,6 +35,7 @@
 #include <wtf/RefCounted.h>
 #include <wtf/RefPtr.h>
 #include <zlib.h>
+#include "ExceptionOr.h"
 
 namespace WebCore {
 

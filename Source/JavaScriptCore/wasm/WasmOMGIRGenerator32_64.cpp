@@ -843,7 +843,16 @@ private:
     void emitArraySetUnchecked(uint32_t, Value*, Value*, Value*);
     bool WARN_UNUSED_RETURN emitStructSet(Value*, uint32_t, const StructType&, Value*);
     ExpressionType WARN_UNUSED_RETURN pushArrayNew(uint32_t typeIndex, Value* initValue, ExpressionType size);
+    
+#if OS(WINDOWS) && COMPILER(GCC)
+// GCC requires the ABI attribute on the function type,
+// before creating a reference to that function type.
+    using ArraySegmentFunction = EncodedJSValue SYSV_ABI (JSC::JSWebAssemblyInstance*, uint32_t, uint32_t, uint32_t, uint32_t);
+    using ArraySegmentOperation = ArraySegmentFunction&;
+#else
     using ArraySegmentOperation = EncodedJSValue SYSV_ABI (&)(JSC::JSWebAssemblyInstance*, uint32_t, uint32_t, uint32_t, uint32_t);
+#endif
+    
     ExpressionType WARN_UNUSED_RETURN pushArrayNewFromSegment(ArraySegmentOperation, uint32_t typeIndex, uint32_t segmentIndex, ExpressionType arraySize, ExpressionType offset, ExceptionType);
     void emitRefTestOrCast(CastKind, ExpressionType, bool, int32_t, bool, ExpressionType&);
     template <typename Generator>

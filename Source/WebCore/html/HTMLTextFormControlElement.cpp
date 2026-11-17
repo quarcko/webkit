@@ -69,6 +69,7 @@
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/MakeString.h>
 #include <wtf/text/StringBuilder.h>
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

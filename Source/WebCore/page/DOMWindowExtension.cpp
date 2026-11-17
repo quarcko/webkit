@@ -33,6 +33,7 @@
 #include "LocalFrame.h"
 #include "LocalFrameLoaderClient.h"
 #include <wtf/Ref.h>
+#include "LocalFrameInlines.h"
 
 namespace WebCore {
 

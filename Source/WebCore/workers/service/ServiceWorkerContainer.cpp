@@ -68,6 +68,10 @@
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/URL.h>
 #include <wtf/Vector.h>
+#include "LocalFrame.h"
+#include "DocumentInlines.h"
+#include "ServiceWorker.h"
+#include "ScriptExecutionContextInlines.h"
 
 #define CONTAINER_RELEASE_LOG(fmt, ...) RELEASE_LOG(ServiceWorker, "%p - ServiceWorkerContainer::" fmt, this, ##__VA_ARGS__)
 #define CONTAINER_RELEASE_LOG_WITH_THIS(thisPtr, fmt, ...) RELEASE_LOG(ServiceWorker, "%p - ServiceWorkerContainer::" fmt, thisPtr, ##__VA_ARGS__)

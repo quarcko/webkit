@@ -96,6 +96,7 @@
 #include <wtf/StdLibExtras.h>
 #include <wtf/text/StringBuilder.h>
 #include <wtf/unicode/CharacterNames.h>
+#include "RenderElementInlines.h"
 
 namespace WebCore {
 

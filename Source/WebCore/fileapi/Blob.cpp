@@ -52,6 +52,7 @@
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/ThreadSafeRefCounted.h>
 #include <wtf/text/CString.h>
+#include "ContextDestructionObserverInlines.h"
 
 namespace WebCore {
 

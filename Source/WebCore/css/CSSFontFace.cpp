@@ -48,6 +48,7 @@
 #include "StyleProperties.h"
 #include "StyleResolveForFont.h"
 #include "StyleRule.h"
+#include "SVGFontFaceElement.h"
 
 namespace WebCore {
 

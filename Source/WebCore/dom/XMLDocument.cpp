@@ -27,6 +27,7 @@
 #include "XMLDocument.h"
 
 #include <wtf/TZoneMallocInlines.h>
+#include "DocumentInlines.h"
 
 namespace WebCore {
 

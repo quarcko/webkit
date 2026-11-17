@@ -35,6 +35,7 @@
 #include "JSDOMConvertStrings.h"
 #include "JSDOMPromiseDeferred.h"
 #include <wtf/SetForScope.h>
+#include "ContextDestructionObserverInlines.h"
 
 
 namespace WebCore {

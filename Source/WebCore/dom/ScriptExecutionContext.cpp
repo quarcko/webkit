@@ -92,6 +92,7 @@
 #include <wtf/SetForScope.h>
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/MakeString.h>
+#include "DocumentInlines.h"
 
 namespace WebCore {
 using namespace Inspector;

@@ -30,6 +30,7 @@
 #include "JSExecState.h"
 #include "LocalDOMWindow.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "Document.h"
 
 namespace WebCore {
 

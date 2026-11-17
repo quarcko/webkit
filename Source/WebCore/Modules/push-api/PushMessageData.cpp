@@ -33,6 +33,7 @@
 #include <JavaScriptCore/JSLock.h>
 #include <JavaScriptCore/JSONObject.h>
 #include <wtf/TZoneMallocInlines.h>
+#include "ExceptionOr.h"
 
 namespace WebCore {
 

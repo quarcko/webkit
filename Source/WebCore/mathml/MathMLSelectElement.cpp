@@ -39,6 +39,8 @@
 #include "RenderTreeUpdater.h"
 #include "SVGElement.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "ContainerNodeInlines.h" 
+#include "RenderObjectInlines.h"
 
 namespace WebCore {
 

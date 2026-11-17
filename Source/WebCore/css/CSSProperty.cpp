@@ -24,6 +24,7 @@
 #include "CSSValueList.h"
 #include "StylePropertyShorthand.h"
 #include <wtf/NeverDestroyed.h>
+#include "CSSQuadValue.h"
 
 namespace WebCore {
 

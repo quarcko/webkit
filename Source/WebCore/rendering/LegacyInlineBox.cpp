@@ -31,6 +31,7 @@
 #include "RenderStyleInlines.h"
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/TextStream.h>
+#include "RenderObjectInlines.h"
 
 #if ENABLE(TREE_DEBUGGING)
 #include <stdio.h>

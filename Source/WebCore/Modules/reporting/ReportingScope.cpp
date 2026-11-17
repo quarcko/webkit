@@ -38,6 +38,7 @@
 #include "TestReportBody.h"
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/StringParsingBuffer.h>
+#include "ContextDestructionObserverInlines.h"
 
 namespace WebCore {
 

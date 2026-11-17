@@ -42,6 +42,7 @@
 #include "WebInjectedScriptManager.h"
 #include <JavaScriptCore/ConsoleMessage.h>
 #include <wtf/TZoneMallocInlines.h>
+#include "EventTargetInlines.h"
 
 namespace WebCore {
 

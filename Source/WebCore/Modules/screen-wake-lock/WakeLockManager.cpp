@@ -31,6 +31,7 @@
 #include "VisibilityState.h"
 #include "WakeLockSentinel.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "ContextDestructionObserverInlines.h"
 
 namespace WebCore {
 

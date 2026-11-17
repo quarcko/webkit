@@ -46,6 +46,7 @@
 #include "ServiceWorkerRegistrationData.h"
 #include <wtf/NeverDestroyed.h>
 #include <wtf/text/StringBuilder.h>
+#include "LocalFrameInlines.h"
 
 namespace WebCore {
 

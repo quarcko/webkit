@@ -40,6 +40,7 @@
 #include "GraphicsContext.h"
 #include "HTMLCanvasElement.h"
 #include "StyleProperties.h"
+#include "NodeInlines.h"
 
 #if ENABLE(OFFSCREEN_CANVAS)
 #include "OffscreenCanvas.h"

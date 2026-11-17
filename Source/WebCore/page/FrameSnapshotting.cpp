@@ -46,6 +46,9 @@
 #include "RenderObject.h"
 #include "RenderStyleInlines.h"
 #include "Settings.h"
+#include "FrameInlines.h"
+#include "LocalFrameInlines.h"
+#include "DocumentInlines.h"
 
 namespace WebCore {
 

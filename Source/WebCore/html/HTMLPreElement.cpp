@@ -28,6 +28,7 @@
 #include "HTMLNames.h"
 #include "MutableStyleProperties.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

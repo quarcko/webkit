@@ -78,6 +78,8 @@
 #include <wtf/persistence/PersistentDecoder.h>
 #include <wtf/text/Base64.h>
 #include <wtf/text/MakeString.h>
+#include "FrameInlines.h" 
+#include "LocalFrameInlines.h"
 
 #if PLATFORM(COCOA)
 #include <wtf/spi/darwin/OSVariantSPI.h>

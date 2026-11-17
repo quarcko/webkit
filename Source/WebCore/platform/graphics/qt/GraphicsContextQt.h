@@ -152,6 +152,12 @@ public:
     void pushTransparencyLayerInternal(const QRect&, qreal, const QImage&);
 
     void takeOwnershipOfPlatformContext();
+
+#if OS(WINDOWS)
+    // These helpers are implemented by the Qt backend, not GraphicsContext.
+    HDC getWindowsContext(const IntRect&, bool supportAlphaBlend);
+    void releaseWindowsContext(HDC, const IntRect&, bool supportAlphaBlend);
+#endif
 private:
     void popTransparencyLayerInternal();
 

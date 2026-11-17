@@ -141,6 +141,7 @@
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/MakeString.h>
 #include <wtf/text/TextStream.h>
+#include "EventTargetInlines.h"
 
 #if PLATFORM(IOS_FAMILY)
 #include "DocumentLoader.h"

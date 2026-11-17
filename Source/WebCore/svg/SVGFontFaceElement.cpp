@@ -47,6 +47,7 @@
 #include "StyleScope.h"
 #include <math.h>
 #include <wtf/TZoneMallocInlines.h>
+#include "SVGPropertyOwnerRegistry.h"
 
 namespace WebCore {
 

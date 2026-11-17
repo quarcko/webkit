@@ -25,8 +25,8 @@
 
 #include "config.h"
 #include "AccessibilitySpinButtonPart.h"
-
 #include "AccessibilitySpinButton.h"
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

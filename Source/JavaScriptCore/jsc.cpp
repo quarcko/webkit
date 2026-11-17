@@ -144,7 +144,9 @@
 #if OS(WINDOWS)
 #include <mmsystem.h>
 #include <windows.h>
+#if COMPILER(MSVC)
 #include <wtf/win/WTFCRTDebug.h>
+#endif
 #endif
 
 #if OS(DARWIN) && CPU(ARM_THUMB2)
@@ -3598,7 +3600,9 @@ int main(int argc, char** argv)
     _setmode(_fileno(stdout), _O_BINARY);
     _setmode(_fileno(stderr), _O_BINARY);
 
+#if COMPILER(MSVC)
     WTF::disableCRTDebugAssertDialog();
+#endif
 
     timeBeginPeriod(1);
 #endif

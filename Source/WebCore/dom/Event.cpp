@@ -37,6 +37,7 @@
 #include <wtf/text/MakeString.h>
 #include <wtf/text/StringBuilder.h>
 #include <wtf/text/TextStream.h>
+#include "EventTargetInlines.h"
 
 namespace WebCore {
 

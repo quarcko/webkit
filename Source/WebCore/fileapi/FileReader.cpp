@@ -44,6 +44,7 @@
 #include <JavaScriptCore/ArrayBuffer.h>
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/CString.h>
+#include "ExceptionOr.h"
 
 namespace WebCore {
 

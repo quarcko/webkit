@@ -30,6 +30,9 @@
 #include "SVGParserUtilities.h"
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/MakeString.h>
+#include "SVGPropertyOwnerRegistry.h"
+#include "SVGStringList.h"
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

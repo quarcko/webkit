@@ -35,6 +35,7 @@
 #include "XMLHttpRequestProgressEventThrottle.h"
 #include <wtf/CancellableTask.h>
 #include <wtf/text/StringBuilder.h>
+#include "ExceptionCode.h"
 
 namespace JSC {
 class ArrayBuffer;

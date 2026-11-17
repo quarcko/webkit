@@ -34,6 +34,7 @@
 #include "RenderStyleInlines.h"
 #include "TransformOperationData.h"
 #include "TransformationMatrix.h"
+#include "RenderObjectInlines.h"
 
 namespace WebCore {
 

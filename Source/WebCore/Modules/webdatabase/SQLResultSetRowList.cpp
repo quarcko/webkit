@@ -28,6 +28,7 @@
 
 #include "config.h"
 #include "SQLResultSetRowList.h"
+#include "ExceptionOr.h"
 
 namespace WebCore {
 

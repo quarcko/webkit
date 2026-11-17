@@ -39,6 +39,8 @@
 #include <wtf/MemoryPressureHandler.h>
 #include <wtf/TZoneMallocInlines.h>
 
+#include "FrameInlines.h"
+
 namespace WebCore {
 
 using namespace JSC;

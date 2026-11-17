@@ -30,6 +30,7 @@
 #include "URLPatternTokenizer.h"
 #include <ranges>
 #include <wtf/text/MakeString.h>
+#include "ExceptionOr.h"
 
 namespace WebCore {
 namespace URLPatternUtilities {

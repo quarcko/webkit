@@ -33,6 +33,7 @@
 #include "LocalDOMWindow.h"
 #include "SecurityOrigin.h"
 #include <JavaScriptCore/ConsoleTypes.h>
+#include "ExceptionOr.h"
 
 namespace WebCore {
 

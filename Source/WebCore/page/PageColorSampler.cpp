@@ -61,6 +61,9 @@
 #include <wtf/Ref.h>
 #include <wtf/RefPtr.h>
 #include <wtf/URL.h>
+#include "DocumentInlines.h"
+#include "LocalFrameInlines.h"
+#include "RenderObjectInlines.h"
 
 namespace WebCore {
 

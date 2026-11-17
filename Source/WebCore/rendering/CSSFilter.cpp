@@ -42,6 +42,7 @@
 #include "SVGFilterElement.h"
 #include "SourceGraphic.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "RenderObjectInlines.h"
 
 namespace WebCore {
 

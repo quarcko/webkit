@@ -33,6 +33,7 @@
 #include "JSDOMPromiseDeferred.h"
 #include "WakeLockManager.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "Event.h"
 
 namespace WebCore {
 

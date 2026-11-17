@@ -37,6 +37,7 @@
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/Threading.h>
 #include <wtf/text/StringImpl.h>
+#include "SharedTimer.h"
 
 namespace WebCore {
 

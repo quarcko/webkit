@@ -51,6 +51,7 @@
 #include <wtf/Ref.h>
 #include <wtf/RobinHoodHashSet.h>
 #include <wtf/TZoneMallocInlines.h>
+#include "ContainerNodeInlines.h"
 
 #if PLATFORM(IOS_FAMILY)
 #include <wtf/RuntimeApplicationChecks.h>

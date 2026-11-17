@@ -104,6 +104,8 @@
 #include <wtf/RuntimeApplicationChecks.h>
 #include <wtf/StackStats.h>
 #include <wtf/TZoneMallocInlines.h>
+#include "PathOperation.h"
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

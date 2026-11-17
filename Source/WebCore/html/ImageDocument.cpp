@@ -53,6 +53,7 @@
 #include "UserScriptTypes.h"
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/MakeString.h>
+#include "LayoutSize.h"
 
 namespace WebCore {
 

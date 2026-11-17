@@ -40,6 +40,7 @@
 #include "InputTypeNames.h"
 #include "RenderElement.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

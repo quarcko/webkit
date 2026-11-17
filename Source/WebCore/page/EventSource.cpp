@@ -52,6 +52,8 @@
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/MakeString.h>
 #include <wtf/text/StringToIntegerConversion.h>
+#include "ExceptionOr.h"
+#include <JavaScriptCore/ConsoleTypes.h>
 
 namespace WebCore {
 

@@ -24,6 +24,7 @@
 
 #include "config.h"
 #include "TextDecoderStreamDecoder.h"
+#include "ExceptionOr.h"
 
 namespace WebCore {
 

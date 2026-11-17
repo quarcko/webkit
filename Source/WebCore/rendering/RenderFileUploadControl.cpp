@@ -45,6 +45,7 @@
 #include "VisiblePosition.h"
 #include <math.h>
 #include <wtf/TZoneMallocInlines.h>
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

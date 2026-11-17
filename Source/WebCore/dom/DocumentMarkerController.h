@@ -33,6 +33,7 @@
 #include <wtf/TZoneMalloc.h>
 #include <wtf/Vector.h>
 #include <wtf/WeakRef.h>
+#include "FloatRect.h"
 
 namespace WebCore {
 

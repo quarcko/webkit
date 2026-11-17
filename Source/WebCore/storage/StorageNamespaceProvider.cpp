@@ -31,6 +31,7 @@
 #include "SecurityOriginData.h"
 #include "StorageArea.h"
 #include "StorageNamespace.h"
+#include "DocumentInlines.h"
 
 namespace WebCore {
 

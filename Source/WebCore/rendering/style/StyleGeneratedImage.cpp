@@ -28,6 +28,8 @@
 #include "RenderElement.h"
 #include "StyleResolver.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "Document.h"
+#include "RenderObjectInlines.h"
 
 namespace WebCore {
 

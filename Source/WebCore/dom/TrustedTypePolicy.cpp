@@ -34,6 +34,7 @@
 #include "WebCoreOpaqueRoot.h"
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/MakeString.h>
+#include "ExceptionOr.h"
 
 namespace WebCore {
 

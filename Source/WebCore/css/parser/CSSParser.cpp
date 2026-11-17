@@ -79,6 +79,7 @@
 #include <memory>
 #include <optional>
 #include <wtf/StdLibExtras.h>
+#include "NodeInlines.h"
 
 namespace WebCore {
 

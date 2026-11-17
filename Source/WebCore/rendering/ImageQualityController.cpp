@@ -33,6 +33,9 @@
 #include "RenderStyleInlines.h"
 #include "RenderView.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "LocalFrameInlines.h"
+#include "FrameDestructionObserverInlines.h"
+#include "RenderObjectInlines.h"
 
 namespace WebCore {
 

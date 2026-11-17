@@ -54,6 +54,7 @@
 #include <wtf/MainThread.h>
 #include <wtf/RunLoop.h>
 #include <wtf/TZoneMallocInlines.h>
+#include "UserGestureIndicator.h"
 
 namespace WebCore {
 

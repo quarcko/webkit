@@ -36,6 +36,7 @@
 #include "HTMLTableCellElement.h"
 #include "RenderObject.h"
 #include "RenderTableCell.h"
+#include "RenderElementInlines.h"
 
 namespace WebCore {
 

@@ -26,6 +26,7 @@
 #include "SVGSVGElement.h"
 #include "SVGViewSpec.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "DocumentInlines.h"
 
 namespace WebCore {
 

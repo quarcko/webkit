@@ -27,6 +27,7 @@
 
 #include <wtf/CheckedRef.h>
 #include <wtf/UniqueRef.h>
+#include <wtf/CheckedPtr.h>
 
 namespace WebCore {
 

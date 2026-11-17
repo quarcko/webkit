@@ -57,28 +57,25 @@ static const JSC::MacroAssembler::RegisterID calleeSavedRegisters[] = {
     JSC::ARM64Registers::x19
 };
 static const JSC::MacroAssembler::RegisterID tempRegister = JSC::ARM64Registers::x15;
+
 #elif CPU(X86_64)
 static const JSC::MacroAssembler::RegisterID callerSavedRegisters[] = {
     JSC::X86Registers::eax,
     JSC::X86Registers::ecx,
     JSC::X86Registers::edx,
-#if !OS(WINDOWS)
     JSC::X86Registers::esi,
     JSC::X86Registers::edi,
-#endif
     JSC::X86Registers::r8,
     JSC::X86Registers::r9,
     JSC::X86Registers::r10,
 };
 static const JSC::MacroAssembler::RegisterID calleeSavedRegisters[] = {
-#if OS(WINDOWS)
-    JSC::X86Registers::edi,
-#endif
     JSC::X86Registers::r12,
     JSC::X86Registers::r13,
     JSC::X86Registers::r14,
     JSC::X86Registers::r15
 };
+
 #else
 #error RegisterAllocator has no defined registers for the architecture.
 #endif

@@ -42,6 +42,8 @@
 #include "Settings.h"
 #include "WindowProxy.h"
 #include <wtf/NeverDestroyed.h>
+#include "FrameInlines.h" 
+#include "LocalFrameInlines.h"
 
 namespace WebCore {
 

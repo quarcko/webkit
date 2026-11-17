@@ -27,6 +27,7 @@
 
 #include "SVGPreserveAspectRatioValue.h"
 #include "SVGValueProperty.h"
+#include "ExceptionOr.h"
 
 namespace WebCore {
 

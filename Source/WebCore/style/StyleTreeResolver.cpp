@@ -71,6 +71,7 @@
 #include "WebAnimationTypes.h"
 #include "WebAnimationUtilities.h"
 #include "dom/EventTarget.h"
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

@@ -26,6 +26,7 @@
 #include "ParserContentPolicy.h"
 #include "Settings.h"
 #include "SharedBuffer.h"
+#include "DocumentInlines.h"
 
 namespace WebCore {
 

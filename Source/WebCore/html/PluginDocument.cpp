@@ -46,6 +46,9 @@
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/MakeString.h>
 #include <wtf/text/TextStream.h>
+#include "DocumentInlines.h"
+#include "LocalFrameInlines.h"
+#include "FrameDestructionObserverInlines.h"
 
 namespace WebCore {
 

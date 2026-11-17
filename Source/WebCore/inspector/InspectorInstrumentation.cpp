@@ -79,6 +79,7 @@
 #include <JavaScriptCore/ScriptArguments.h>
 #include <JavaScriptCore/ScriptCallStack.h>
 #include <wtf/StdLibExtras.h>
+#include "EventTargetInlines.h"
 
 namespace WebCore {
 

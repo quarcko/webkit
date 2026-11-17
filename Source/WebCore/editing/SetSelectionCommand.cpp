@@ -29,6 +29,7 @@
 #include "CompositeEditCommand.h"
 #include "Document.h"
 #include "LocalFrame.h"
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

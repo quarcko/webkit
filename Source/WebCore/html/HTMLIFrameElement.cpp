@@ -44,6 +44,7 @@
 #include "TrustedType.h"
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/MakeString.h>
+#include <JavaScriptCore/ConsoleTypes.h>
 
 namespace WebCore {
 

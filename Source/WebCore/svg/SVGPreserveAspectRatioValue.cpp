@@ -31,6 +31,7 @@
 #include <wtf/text/MakeString.h>
 #include <wtf/text/StringParsingBuffer.h>
 #include <wtf/text/StringView.h>
+#include "ExceptionOr.h"
 
 namespace WebCore {
 

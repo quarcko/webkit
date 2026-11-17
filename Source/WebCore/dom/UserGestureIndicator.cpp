@@ -37,6 +37,8 @@
 #include <wtf/MainThread.h>
 #include <wtf/NeverDestroyed.h>
 #include <wtf/TZoneMallocInlines.h>
+#include "LocalFrameInlines.h" 
+#include "DocumentInlines.h"
 
 namespace WebCore {
 

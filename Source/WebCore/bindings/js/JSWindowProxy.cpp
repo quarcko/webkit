@@ -44,6 +44,7 @@
 #include <JavaScriptCore/JSObject.h>
 #include <JavaScriptCore/StrongInlines.h>
 #include <wtf/text/MakeString.h>
+#include "Document.h"
 
 #if PLATFORM(COCOA)
 #include <wtf/cocoa/RuntimeApplicationChecksCocoa.h>

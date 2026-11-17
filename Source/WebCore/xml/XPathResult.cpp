@@ -29,6 +29,7 @@
 
 #include "Document.h"
 #include "XPathEvaluator.h"
+#include "ExceptionOr.h"
 
 namespace WebCore {
 

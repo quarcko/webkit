@@ -406,7 +406,7 @@ class LabelReference
         if !isWin
             $asm.puts "movq #{asmLabel}@GOTPCREL(%rip), #{dst.x86Operand(:ptr)}"
         else
-            $asm.puts "lea #{asmLabel}@GOTPCREL(%rip), #{dst.x86Operand(:ptr)}"
+            $asm.puts "leaq #{asmLabel}(%rip), #{dst.x86Operand(:ptr)}"
         end
         offsetRegister(offset, dst.x86Operand(:ptr))
     end
@@ -527,7 +527,7 @@ class Instruction
             if !isWin
                 $asm.puts "movq #{src.asmLabel}@GOTPCREL(%rip), #{dst.x86Operand(:ptr)}"
             else
-                $asm.puts "lea #{src.asmLabel}@GOTPCREL(%rip), #{dst.x86Operand(:ptr)}"
+                $asm.puts "leaq #{src.asmLabel}(%rip), #{dst.x86Operand(:ptr)}"
             end
             if src.offset != 0
                 $asm.puts "add#{x86Suffix(kind)} #{orderOperands(const(src.offset), dst.x86Operand(kind))}"

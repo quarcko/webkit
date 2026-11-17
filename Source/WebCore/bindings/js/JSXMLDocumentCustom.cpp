@@ -29,6 +29,8 @@
 #include "JSDocumentCustom.h"
 #include "NodeTraversal.h"
 
+#include "DocumentInlines.h"
+
 namespace WebCore {
 
 using namespace JSC;

@@ -85,6 +85,8 @@
 #include <wtf/SetForScope.h>
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/MakeString.h>
+#include "ContainerNodeInlines.h"
+#include "RenderLayerInlines.h"
 
 namespace WebCore {
 

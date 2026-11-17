@@ -63,6 +63,7 @@
 #include <wtf/WeakHashMap.h>
 #include <wtf/text/MakeString.h>
 #include <wtf/text/StringBuilder.h>
+#include <JavaScriptCore/ConsoleTypes.h>
 
 #if PLATFORM(COCOA)
 #include "DataDetection.h"

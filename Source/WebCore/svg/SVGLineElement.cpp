@@ -29,6 +29,8 @@
 #include "SVGLengthValue.h"
 #include "SVGParsingError.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "SVGPropertyOwnerRegistry.h"
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

@@ -36,6 +36,9 @@
 #include "StyleScope.h"
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/MakeString.h>
+#include "Settings.h"
+#include "FrameDestructionObserverInlines.h"
+#include "LocalFrameInlines.h"
 
 namespace WebCore {
 

@@ -96,6 +96,10 @@
 #include <wtf/NeverDestroyed.h>
 #include <wtf/ThreadingPrimitives.h>
 
+#if PLATFORM(QT) && !COMPILER(MSVC)
+#include <string>
+#endif
+
 namespace WTF {
 
 Thread::~Thread()
@@ -110,6 +114,34 @@ void Thread::initializeCurrentThreadEvenIfNonWTFCreated()
 {
 }
 
+#if PLATFORM(QT) && !COMPILER(MSVC)
+// GCC/MinGW cannot compile MSVC's __try/__except extension. Thread names are
+// diagnostic only: resolve the modern API at runtime and do not raise an
+// unhandled debugger exception when no naming API is available.
+static void setThreadDescriptionIfAvailable(const char* name)
+{
+    using SetThreadDescriptionFunction = HRESULT (WINAPI*)(HANDLE, PCWSTR);
+    auto module = GetModuleHandleW(L"Kernel32.dll");
+    auto setThreadDescription = module
+        ? reinterpret_cast<SetThreadDescriptionFunction>(GetProcAddress(module, "SetThreadDescription"))
+        : nullptr;
+    if (!setThreadDescription) {
+        module = GetModuleHandleW(L"KernelBase.dll");
+        if (module)
+            setThreadDescription = reinterpret_cast<SetThreadDescriptionFunction>(GetProcAddress(module, "SetThreadDescription"));
+    }
+    if (!setThreadDescription)
+        return;
+
+    int length = MultiByteToWideChar(CP_UTF8, 0, name, -1, nullptr, 0);
+    if (length <= 0)
+        return;
+    std::wstring wideName(static_cast<size_t>(length), L'\0');
+    if (!MultiByteToWideChar(CP_UTF8, 0, name, -1, wideName.data(), length))
+        return;
+    setThreadDescription(GetCurrentThread(), wideName.c_str());
+}
+#else
 // MS_VC_EXCEPTION, THREADNAME_INFO, and setThreadNameInternal all come from <http://msdn.microsoft.com/en-us/library/xcb2z8hs.aspx>.
 static const DWORD MS_VC_EXCEPTION = 0x406D1388;
 
@@ -121,9 +153,13 @@ typedef struct tagTHREADNAME_INFO {
     DWORD dwFlags; // reserved for future use, must be zero
 } THREADNAME_INFO;
 #pragma pack(pop)
+#endif
 
 void Thread::initializeCurrentThreadInternal(const char* szThreadName)
 {
+#if PLATFORM(QT) && !COMPILER(MSVC)
+    setThreadDescriptionIfAvailable(normalizeThreadName(szThreadName));
+#else
     THREADNAME_INFO info;
     info.dwType = 0x1000;
     info.szName = Thread::normalizeThreadName(szThreadName);
@@ -133,6 +169,7 @@ void Thread::initializeCurrentThreadInternal(const char* szThreadName)
     __try {
         RaiseException(MS_VC_EXCEPTION, 0, sizeof(info) / sizeof(ULONG_PTR), reinterpret_cast<ULONG_PTR*>(&info));
     } __except(EXCEPTION_CONTINUE_EXECUTION) { }
+#endif
 
     initializeCurrentThreadEvenIfNonWTFCreated();
 }

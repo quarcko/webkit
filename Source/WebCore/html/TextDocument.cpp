@@ -28,6 +28,7 @@
 #include "CSSTokenizerInputStream.h"
 #include "TextDocumentParser.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "DocumentInlines.h"
 
 namespace WebCore {
 

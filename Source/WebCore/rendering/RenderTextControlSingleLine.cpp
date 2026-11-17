@@ -51,6 +51,7 @@
 #include "TextControlInnerElements.h"
 #include <wtf/StackStats.h>
 #include <wtf/TZoneMallocInlines.h>
+#include "ContainerNodeInlines.h"
 
 #if PLATFORM(IOS_FAMILY)
 #include "RenderThemeIOS.h"

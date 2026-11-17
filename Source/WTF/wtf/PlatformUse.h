@@ -149,7 +149,11 @@
 
 /* FIXME: This name should be more specific if it is only for use with CallFrame* */
 /* Use __builtin_frame_address(1) to get CallFrame* */
-#if CPU(ARM64) || CPU(X86_64)
+
+// MinGW GCC cannot use the Windows _AddressOfReturnAddress()
+// intrinsic required by JavaScriptCore's frame-recovery path.
+// Use the existing VM call-frame tracking fallback instead.
+#if CPU(ARM64) || (CPU(X86_64) && !(OS(WINDOWS) && COMPILER(GCC)))
 #define USE_BUILTIN_FRAME_ADDRESS 1
 #endif
 

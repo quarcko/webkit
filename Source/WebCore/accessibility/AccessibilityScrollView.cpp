@@ -35,6 +35,7 @@
 #include "RemoteFrameView.h"
 #include "RenderElement.h"
 #include "Widget.h"
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
     

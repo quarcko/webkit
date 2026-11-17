@@ -27,6 +27,7 @@
 #include "RenderTheme.h"
 #include <wtf/RefPtr.h>
 #include <wtf/TZoneMallocInlines.h>
+#include "RenderElementInlines.h"
 
 namespace WebCore {
 

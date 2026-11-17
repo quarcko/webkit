@@ -76,6 +76,7 @@
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/Base64.h>
 #include <wtf/text/StringBuilder.h>
+#include "EventTargetInlines.h"
 
 #if ENABLE(APPLICATION_MANIFEST)
 #include "CachedApplicationManifest.h"

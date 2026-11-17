@@ -30,6 +30,7 @@
 #include <span>
 #include <wtf/Function.h>
 #include <wtf/RefCounted.h>
+#include <wtf/Ref.h>
 
 namespace WebCore {
 

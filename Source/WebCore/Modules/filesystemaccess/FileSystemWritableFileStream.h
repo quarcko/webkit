@@ -27,6 +27,7 @@
 
 #include "FileSystemWriteCommandType.h"
 #include "WritableStream.h"
+#include "Blob.h"
 
 namespace WebCore {
 

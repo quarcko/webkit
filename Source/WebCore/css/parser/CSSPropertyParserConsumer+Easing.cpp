@@ -77,39 +77,34 @@ static std::optional<CSS::EasingFunction> consumeUnresolvedStepsEasingFunction(C
     if (consumeCommaIncludingWhitespace(args)) {
         switch (args.consumeIncludingWhitespace().id()) {
         case CSSValueJumpStart:
-            parameters = { CSS::StepsEasingParameters::JumpStart { WTFMove(*steps) } };
+            parameters.emplace(CSS::StepsEasingParameters::JumpStart { WTFMove(*steps) });
             break;
         case CSSValueJumpEnd:
-            parameters = { CSS::StepsEasingParameters::JumpEnd { WTFMove(*steps) } };
+            parameters.emplace(CSS::StepsEasingParameters::JumpEnd { WTFMove(*steps) });
             break;
         case CSSValueJumpNone: {
-            // "The first parameter specifies the number of intervals in the function. It must be a
-            //  positive integer greater than 0 unless the second parameter is jump-none in which
-            //  case it must be a positive integer greater than 1."
-
-            // Re-parse `steps` to account for different type requirement.
-            auto stepsJumpNone = MetaConsumer<CSS::Integer<CSS::Range{2,CSS::Range::infinity}>>::consume(stashedArgs, state);
+            auto stepsJumpNone =
+                MetaConsumer<CSS::Integer<CSS::Range{2, CSS::Range::infinity}>>::consume(stashedArgs, state);
             if (!stepsJumpNone)
                 return { };
 
-            parameters = { CSS::StepsEasingParameters::JumpNone { WTFMove(*stepsJumpNone) } };
+            parameters.emplace(CSS::StepsEasingParameters::JumpNone { WTFMove(*stepsJumpNone) });
             break;
         }
 
         case CSSValueJumpBoth:
-            parameters = { CSS::StepsEasingParameters::JumpBoth { WTFMove(*steps) } };
+            parameters.emplace(CSS::StepsEasingParameters::JumpBoth { WTFMove(*steps) });
             break;
         case CSSValueStart:
-            parameters = { CSS::StepsEasingParameters::Start { WTFMove(*steps) } };
+            parameters.emplace(CSS::StepsEasingParameters::Start { WTFMove(*steps) });
             break;
         case CSSValueEnd:
-            parameters = { CSS::StepsEasingParameters::End { WTFMove(*steps) } };
+            parameters.emplace(CSS::StepsEasingParameters::End { WTFMove(*steps) });
             break;
         default:
             return { };
         }
-    } else
-        parameters = { CSS::StepsEasingParameters::End { WTFMove(*steps) } };
+        parameters.emplace(CSS::StepsEasingParameters::End { WTFMove(*steps) });
 
     if (!args.atEnd())
         return { };
@@ -121,6 +116,7 @@ static std::optional<CSS::EasingFunction> consumeUnresolvedStepsEasingFunction(C
             .parameters = WTFMove(*parameters)
         }
     };
+    }
 }
 
 // MARK: - <linear()>

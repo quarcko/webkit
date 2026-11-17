@@ -41,6 +41,7 @@
 #include "ResourceResponse.h"
 #include "WindowEventLoop.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "ContextDestructionObserverInlines.h"
 
 namespace WebCore {
 

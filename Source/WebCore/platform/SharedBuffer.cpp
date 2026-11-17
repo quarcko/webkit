@@ -31,6 +31,7 @@
 #include "SharedMemory.h"
 #include <JavaScriptCore/ArrayBuffer.h>
 #include <algorithm>
+#include <cinttypes>
 #include <wtf/HexNumber.h>
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/persistence/PersistentCoders.h>
@@ -268,12 +269,12 @@ RefPtr<ArrayBuffer> FragmentedSharedBuffer::tryCreateArrayBuffer() const
 {
     // FIXME: This check is no longer needed to avoid integer truncation. Consider removing it.
     if (size() > std::numeric_limits<unsigned>::max()) {
-        WTFLogAlways("SharedBuffer::tryCreateArrayBuffer Unable to create buffer. Requested size is too large (%zu)\n", size());
+        WTFLogAlways("SharedBuffer::tryCreateArrayBuffer Unable to create buffer. Requested size is too large (%" PRIu64 ")\n", static_cast<uint64_t>(size()));
         return nullptr;
     }
     auto arrayBuffer = ArrayBuffer::tryCreateUninitialized(size(), 1);
     if (!arrayBuffer) {
-        WTFLogAlways("SharedBuffer::tryCreateArrayBuffer Unable to create buffer. Requested size was %zu\n", size());
+        WTFLogAlways("SharedBuffer::tryCreateArrayBuffer Unable to create buffer. Requested size was %" PRIu64 "\n", static_cast<uint64_t>(size()));
         return nullptr;
     }
     copyTo(arrayBuffer->mutableSpan());

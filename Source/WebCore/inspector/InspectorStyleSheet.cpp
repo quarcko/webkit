@@ -74,6 +74,7 @@
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/ParsingUtilities.h>
 #include <wtf/text/StringBuilder.h>
+#include "EventTargetInlines.h"
 
 using JSON::ArrayOf;
 

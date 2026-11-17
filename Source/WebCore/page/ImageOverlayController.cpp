@@ -45,6 +45,7 @@
 #include "SimpleRange.h"
 #include "VisiblePosition.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

@@ -124,7 +124,7 @@ static double highResUpTime()
         if (tickCount >= tickCountLast)
             tickCountElapsed = (tickCount - tickCountLast);
         else {
-            __int64 tickCountLarge = tickCount + 0x100000000I64;
+            __int64 tickCountLarge = tickCount + 0x100000000LL;
             tickCountElapsed = tickCountLarge - tickCountLast;
         }
 

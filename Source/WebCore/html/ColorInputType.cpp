@@ -54,6 +54,7 @@
 #include "UserAgentParts.h"
 #include "UserGestureIndicator.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

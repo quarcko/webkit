@@ -47,6 +47,7 @@
 #include <wtf/Ref.h>
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/MakeString.h>
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

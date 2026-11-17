@@ -30,6 +30,7 @@
 #include "Navigator.h"
 #include "Page.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "FrameInlines.h"
 
 namespace WebCore {
 using namespace JSC;

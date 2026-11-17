@@ -46,6 +46,8 @@
 #include "markup.h"
 #include <wtf/Function.h>
 #include <wtf/TZoneMallocInlines.h>
+#include "LocalFrameInlines.h"
+#include "DocumentInlines.h"
 
 namespace WebCore {
 

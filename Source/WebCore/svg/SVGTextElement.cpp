@@ -28,6 +28,7 @@
 #include "SVGRenderStyle.h"
 #include "SVGTSpanElement.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

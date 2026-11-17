@@ -63,6 +63,8 @@
 #include "TransformState.h"
 #include <wtf/MathExtras.h>
 #include <wtf/TZoneMallocInlines.h>
+#include "PathOperation.h"
+#include "RenderElementInlines.h"
 
 namespace WebCore {
 

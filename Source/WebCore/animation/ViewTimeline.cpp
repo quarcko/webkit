@@ -42,6 +42,7 @@
 #include "StyleBuilderConverter.h"
 #include "StyleScrollPadding.h"
 #include "WebAnimation.h"
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

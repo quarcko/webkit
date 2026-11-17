@@ -37,6 +37,7 @@
 #include <math.h>
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/CString.h>
+#include "Document.h"
 
 namespace WebCore {
 

@@ -37,6 +37,7 @@
 #include "RenderElementInlines.h"
 #include "RenderListItem.h"
 #include "RenderStyleInlines.h"
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
     

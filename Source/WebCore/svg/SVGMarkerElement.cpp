@@ -30,6 +30,7 @@
 #include "SVGNames.h"
 #include "SVGParsingError.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

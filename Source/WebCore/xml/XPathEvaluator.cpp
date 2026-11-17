@@ -31,6 +31,7 @@
 #include "XPathExpression.h"
 #include "XPathResult.h"
 #include "XPathUtil.h"
+#include "ExceptionOr.h"
 
 namespace WebCore {
 

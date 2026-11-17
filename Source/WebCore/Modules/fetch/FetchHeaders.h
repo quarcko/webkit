@@ -32,6 +32,7 @@
 #include "HTTPHeaderMap.h"
 #include <wtf/HashTraits.h>
 #include <wtf/Vector.h>
+#include "ExceptionOr.h"
 
 namespace WebCore {
 

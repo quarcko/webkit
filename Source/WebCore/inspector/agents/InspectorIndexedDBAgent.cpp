@@ -69,6 +69,7 @@
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/Vector.h>
 #include <wtf/text/MakeString.h>
+#include "EventTargetInlines.h"
 
 namespace WebCore {
 

@@ -38,6 +38,8 @@
 #include <wtf/Vector.h>
 #include <wtf/text/MakeString.h>
 #include <wtf/text/WTFString.h>
+#include "ExceptionOr.h"
+#include "EventTargetInlines.h"
 
 namespace WebCore {
 

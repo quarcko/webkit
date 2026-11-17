@@ -34,6 +34,8 @@
 #include "RenderMathMLFraction.h"
 #include "Settings.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "RenderObjectInlines.h" 
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

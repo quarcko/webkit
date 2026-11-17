@@ -33,6 +33,9 @@
 #include "RemoteFrameClient.h"
 #include "RemoteFrameView.h"
 #include <wtf/CompletionHandler.h>
+#include "DocumentLoader.h"
+#include "NodeInlines.h"
+#include "FrameInlines.h"
 
 namespace WebCore {
 

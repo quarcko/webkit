@@ -36,6 +36,7 @@
 #include <JavaScriptCore/JSGenericTypedArrayViewInlines.h>
 #include <pal/crypto/gcrypt/Utilities.h>
 #include <pal/crypto/tasn1/Utilities.h>
+#include "ExceptionOr.h"
 
 namespace WebCore {
 

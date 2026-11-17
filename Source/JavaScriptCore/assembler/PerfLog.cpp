@@ -57,10 +57,12 @@ inline static int open(const char* filename, int oflag, int pmode)
     return _open(filename, oflag, pmode);
 }
 
+#if !defined(__MINGW32__)
 inline static FILE* fdopen(int fd, const char* mode)
 {
     return _fdopen(fd, mode);
 }
+#endif
 #endif
 
 WTF_ALLOW_UNSAFE_BUFFER_USAGE_BEGIN

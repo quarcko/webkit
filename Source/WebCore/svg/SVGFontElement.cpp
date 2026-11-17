@@ -33,6 +33,7 @@
 #include "SVGVKernElement.h"
 #include <wtf/ASCIICType.h>
 #include <wtf/TZoneMallocInlines.h>
+#include "SVGPropertyOwnerRegistry.h"
 
 namespace WebCore {
 

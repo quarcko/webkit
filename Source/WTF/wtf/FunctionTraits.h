@@ -83,6 +83,13 @@ struct FunctionTraits<Result SYSV_ABI(Args...)> : public FunctionTraits<Result(A
 };
 #endif
 
+#if OS(WINDOWS) && COMPILER(GCC)
+// MinGW: avoid duplicate specializations for function pointers
+// with different calling conventions.
+template<typename FunctionType>
+struct FunctionTraits<FunctionType*> : public FunctionTraits<FunctionType> {
+};
+#else
 template<typename Result, typename... Args>
 struct FunctionTraits<Result(*)(Args...)> : public FunctionTraits<Result(Args...)> {
 };
@@ -91,6 +98,7 @@ struct FunctionTraits<Result(*)(Args...)> : public FunctionTraits<Result(Args...
 template<typename Result, typename... Args>
 struct FunctionTraits<Result SYSV_ABI (*)(Args...)> : public FunctionTraits<Result(Args...)> {
 };
+#endif
 #endif
 
 template<typename Result, typename... Args>

@@ -27,6 +27,7 @@
 
 #include "SVGLengthContext.h"
 #include "SVGValueProperty.h"
+#include "ExceptionOr.h"
 
 namespace WebCore {
 

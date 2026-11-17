@@ -80,6 +80,7 @@
 #include "markup.h"
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/MakeString.h>
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

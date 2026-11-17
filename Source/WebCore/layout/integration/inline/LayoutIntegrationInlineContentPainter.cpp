@@ -35,6 +35,9 @@
 #include "RenderStyleInlines.h"
 #include "TextBoxPainter.h"
 #include <wtf/Assertions.h>
+#include "RenderBoxModelObjectInlines.h"
+#include "RenderBoxInlines.h"
+#include "RenderElementInlines.h"
 
 namespace WebCore {
 namespace LayoutIntegration {

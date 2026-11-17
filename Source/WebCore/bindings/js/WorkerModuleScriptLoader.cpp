@@ -40,6 +40,7 @@
 #include "ServiceWorkerGlobalScope.h"
 #include "WorkerScriptFetcher.h"
 #include "WorkerScriptLoader.h"
+#include "Document.h"
 
 namespace WebCore {
 

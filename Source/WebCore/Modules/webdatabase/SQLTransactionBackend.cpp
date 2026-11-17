@@ -45,6 +45,7 @@
 #include "SQLiteTransaction.h"
 #include <wtf/StdLibExtras.h>
 #include <wtf/text/WTFString.h>
+#include "ContextDestructionObserverInlines.h"
 
 
 // How does a SQLTransaction work?

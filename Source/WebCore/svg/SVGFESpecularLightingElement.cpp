@@ -33,6 +33,7 @@
 #include "SVGParserUtilities.h"
 #include "SVGRenderStyle.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "SVGPropertyOwnerRegistry.h"
 
 namespace WebCore {
 

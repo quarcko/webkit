@@ -32,6 +32,7 @@
 #include <wtf/Vector.h>
 #include <wtf/text/CString.h>
 #include <wtf/text/StringBuilder.h>
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

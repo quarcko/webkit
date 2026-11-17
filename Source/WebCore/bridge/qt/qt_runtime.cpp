@@ -45,6 +45,7 @@
 #include <JavaScriptCore/PropertyNameArray.h>
 #include <JavaScriptCore/NumberObject.h>
 #include <FrameDestructionObserverInlines.h>
+#include <QTimeZone>
 #include <QDateTime>
 #include <QDebug>
 #include <QMetaObject>
@@ -298,13 +299,13 @@ static void getGregorianDateTimeUTC(JSContextRef context, JSRealType type, JSVal
     JSGlobalObject* lexicalGlobalObject = toJS(context);
     JSLockHolder locker(lexicalGlobalObject);
     const GregorianDateTime* other;
+    GregorianDateTime convertedGdt;
     if (type == Date) {
         JSObject* jsObject = toJS(object);
         DateInstance* date = jsDynamicCast<DateInstance*>(jsObject);
         other = date->gregorianDateTimeUTC(lexicalGlobalObject->vm().dateCache);
     } else {
         double ms = JSValueToNumber(context, value, exception);
-        GregorianDateTime convertedGdt;
         lexicalGlobalObject->vm().dateCache.msToGregorianDateTime(ms, TimeType::UTCTime, convertedGdt);
         other = &convertedGdt;
     }
@@ -327,7 +328,7 @@ static QDateTime toQDateTimeUTC(JSContextRef context, JSRealType type, JSValueRe
     getGregorianDateTimeUTC(context, type, value, object, exception, &gdt);
     QDate date(gdt.year(), gdt.month() + 1, gdt.monthDay());
     QTime time(gdt.hour(), gdt.minute(), gdt.second());
-    return QDateTime(date, time, Qt::UTC);
+    return QDateTime(date, time, QTimeZone::UTC);
 }
 
 QVariant convertValueToQVariant(JSContextRef context, JSValueRef value, QMetaType::Type hint, int *distance, HashSet<JSObjectRef>* visitedObjects, int recursionLimit, JSValueRef* exception)

@@ -30,6 +30,7 @@
 #include "FormData.h"
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/WorkQueue.h>
+#include "ExceptionOr.h"
 
 namespace WebCore {
 

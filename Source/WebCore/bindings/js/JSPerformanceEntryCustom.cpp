@@ -43,7 +43,7 @@
 #include "PerformanceNavigationTiming.h"
 #include "PerformancePaintTiming.h"
 #include "PerformanceResourceTiming.h"
-
+#include "ContextDestructionObserverInlines.h"
 
 namespace WebCore {
 using namespace JSC;

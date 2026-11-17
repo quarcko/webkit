@@ -79,6 +79,7 @@
 #include <wtf/text/TextBreakIterator.h>
 #include <wtf/unicode/CharacterNames.h>
 #include <wtf/unicode/icu/ICUHelpers.h>
+#include "ContainerNodeInlines.h"
 
 #if !UCONFIG_NO_COLLATION
 #include <unicode/usearch.h>

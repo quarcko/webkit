@@ -1753,14 +1753,28 @@ HDC GraphicsContextQt::getWindowsContext(const IntRect& dstRect, bool supportAlp
     HDC displayDC = ::GetDC(0);
     HDC bitmapDC = ::CreateCompatibleDC(displayDC);
     ::ReleaseDC(0, displayDC);
+    if (!bitmapDC) {
+        ::DeleteObject(bitmap);
+        return nullptr;
+    }
 
-    ::SelectObject(bitmapDC, bitmap);
+    auto previousBitmap = ::SelectObject(bitmapDC, bitmap);
+    if (!previousBitmap || previousBitmap == HGDI_ERROR) {
+        ::DeleteDC(bitmapDC);
+        ::DeleteObject(bitmap);
+        return nullptr;
+    }
 
     // Fill our buffer with clear if we're going to alpha blend.
     if (supportAlphaBlend) {
-        BITMAP bmpInfo;
-        GetObject(bitmap, sizeof(bmpInfo), &bmpInfo);
-        int bufferSize = bmpInfo.bmWidthBytes * bmpInfo.bmHeight;
+        BITMAP bmpInfo { };
+        if (!::GetObject(bitmap, sizeof(bmpInfo), &bmpInfo) || !bmpInfo.bmBits
+            || bmpInfo.bmWidthBytes <= 0 || bmpInfo.bmHeight <= 0) {
+            ::DeleteDC(bitmapDC);
+            ::DeleteObject(bitmap);
+            return nullptr;
+        }
+        size_t bufferSize = static_cast<size_t>(bmpInfo.bmWidthBytes) * static_cast<size_t>(bmpInfo.bmHeight);
         memset(bmpInfo.bmBits, 0, bufferSize);
     }
 
@@ -1784,23 +1798,23 @@ HDC GraphicsContextQt::getWindowsContext(const IntRect& dstRect, bool supportAlp
 
 void GraphicsContextQt::releaseWindowsContext(HDC hdc, const IntRect& dstRect, bool supportAlphaBlend)
 {
-    if (hdc) {
+    if (!hdc)
+        return;
 
-        if (!dstRect.isEmpty()) {
+    HBITMAP bitmap = static_cast<HBITMAP>(::GetCurrentObject(hdc, OBJ_BITMAP));
+    // Complete drawing before reading the DIB. Destroying our private DC
+    // deselects the bitmap; GetDIBits and DeleteObject both require that it
+    // is not selected into a DC. DeleteDC does not delete the bitmap.
+    ::GdiFlush();
+    ::DeleteDC(hdc);
+    if (!bitmap)
+        return;
 
-            HBITMAP bitmap = static_cast<HBITMAP>(GetCurrentObject(hdc, OBJ_BITMAP));
-            BITMAP info;
-            GetObject(bitmap, sizeof(info), &info);
-            ASSERT(info.bmBitsPixel == 32);
-
-            QPixmap pixmap = qt_pixmapFromWinHBITMAP(bitmap, supportAlphaBlend ? HBitmapPremultipliedAlpha : HBitmapNoAlpha);
-            m_data->p()->drawPixmap(dstRect, pixmap);
-
-            ::DeleteObject(bitmap);
-        }
-
-        ::DeleteDC(hdc);
+    if (!dstRect.isEmpty()) {
+        QPixmap pixmap = qt_pixmapFromWinHBITMAP(bitmap, supportAlphaBlend ? HBitmapPremultipliedAlpha : HBitmapNoAlpha);
+        m_data->p()->drawPixmap(dstRect, pixmap);
     }
+    ::DeleteObject(bitmap);
 }
 #endif
 

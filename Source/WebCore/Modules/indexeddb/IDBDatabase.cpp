@@ -43,6 +43,7 @@
 #include <JavaScriptCore/HeapInlines.h>
 #include <ranges>
 #include <wtf/TZoneMallocInlines.h>
+#include "ExceptionOr.h"
 
 namespace WebCore {
 

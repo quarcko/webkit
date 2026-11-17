@@ -108,6 +108,7 @@
 #include <wtf/StackStats.h>
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/TextStream.h>
+#include "ContainerNodeInlines.h"
 
 #if ENABLE(CONTENT_CHANGE_OBSERVER)
 #include "ContentChangeObserver.h"

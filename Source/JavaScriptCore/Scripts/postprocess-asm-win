@@ -1,0 +1,184 @@
+#!/usr/bin/env ruby
+
+# Copyright (C) 2020 Igalia S. L.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+# THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+# THE POSSIBILITY OF SUCH DAMAGE.
+
+# Windows/MinGW wrapper for offlineasm debug source maps.
+# The resolver is kept separate so the same Ruby interpreter runs both stages.
+# Compile to assembly, remap .file/.loc identifiers, and assemble to the object.
+
+require 'rbconfig'
+require 'tempfile'
+
+POSTPROCESSOR = File.join(__dir__, 'resolve-asm-file-conflicts-win.rb')
+
+# GCC response files use whitespace, quotes and backslash escaping (not cmd.exe
+# parsing). Expand them before finding -DPOSTPROCESS_ASM, -c and -o, because
+# Windows generators commonly place those arguments in a response file.
+def split_response(text, filename)
+  text = text.sub(/\A\xEF\xBB\xBF/n, '')
+  if text.start_with?("\xFF\xFE".b, "\xFE\xFF".b)
+    raise "UTF-16 response files are not supported: #{filename}"
+  end
+  result = []
+  token = +''
+  quote = nil
+  escaped = false
+  started = false
+  text.each_char do |ch|
+    if escaped
+      token << ch
+      escaped = false
+    elsif ch == '\\'
+      escaped = true
+      started = true
+    elsif quote
+      if ch == quote
+        quote = nil
+      else
+        token << ch
+      end
+    elsif ch == '"' || ch == "'"
+      quote = ch
+      started = true
+    elsif ch.match?(/\s/)
+      if started
+        result << token
+        token = +''
+        started = false
+      end
+    else
+      token << ch
+      started = true
+    end
+  end
+  raise "Unterminated quoting/escaping in response file: #{filename}" if quote || escaped
+  result << token if started
+  result
+end
+
+def expand_responses(args, stack = [])
+  args.flat_map do |arg|
+    if arg.start_with?('@') && arg.length > 1
+      path = File.expand_path(arg[1..-1])
+      raise "Recursive or excessively nested response file: #{path}" if stack.include?(path) || stack.length >= 16
+      raise "Response file is too large: #{path}" if File.size(path) > 16 * 1024 * 1024
+      expand_responses(split_response(File.binread(path), path), stack + [path])
+    else
+      [arg]
+    end
+  end
+end
+
+def argument_index(args, value)
+  args.index(value) || raise("Missing #{value} in compiler command")
+end
+
+def run_command(args)
+  pid = Process.spawn(*args)
+  _, status = Process.waitpid2(pid)
+  return if status.success?
+  warn "Compiler/assembler command failed: #{status}"
+  exit(status.exitstatus || 128 + (status.termsig || 0))
+end
+
+# Preserve response-file boundaries when invoking the compiler. Expanding a
+# large Windows include list back onto its command line would defeat the
+# generator's response file and can exceed the process command-line limit.
+def run_compiler(args, groups)
+  temporary_responses = []
+  command = []
+  offset = 0
+  begin
+    groups.each do |count, was_response|
+      values = args[offset, count]
+      offset += count
+      if was_response
+        response = Tempfile.new(['webkit-offlineasm-', '.rsp'])
+        temporary_responses << response
+        response.binmode
+        values.each do |value|
+          escaped = value.gsub(/["\\]/) { |character| "\\#{character}" }
+          response.write('"' + escaped + "\"\n")
+        end
+        response.close # Windows child processes must be able to reopen it.
+        command << "@#{response.path}"
+      else
+        command.concat(values)
+      end
+    end
+    run_command(command)
+  ensure
+    temporary_responses.each(&:close!)
+  end
+end
+
+intermediates = []
+begin
+  raise 'The compiler executable must not be inside a response file' if ARGV.empty? || ARGV.first.start_with?('@')
+  groups = []
+  args = ARGV.flat_map do |argument|
+    expanded = expand_responses([argument])
+    groups << [expanded.length, argument.start_with?('@') && argument.length > 1]
+    expanded
+  end
+  prefix = '-DPOSTPROCESS_ASM='
+  definition_index = args.index { |arg| arg.start_with?(prefix) }
+  raise 'Missing -DPOSTPROCESS_ASM=source-suffix' unless definition_index
+  suffix = args[definition_index][prefix.length..-1].tr('\\', '/')
+  raise 'Empty -DPOSTPROCESS_ASM source suffix' if suffix.empty?
+  args[definition_index] = '-DPOSTPROCESS_ASM'
+
+  c_index = argument_index(args, '-c')
+  o_index = argument_index(args, '-o')
+  object_path = args[o_index + 1]
+  raise 'Missing object path after -o' unless object_path
+  raise "Expected a .o or .obj output: #{object_path}" unless object_path.match?(/\.(?:o|obj)\z/i)
+
+  # Compare path separators without rewriting the path passed to the compiler.
+  candidates = args.each_index.select { |i| args[i].tr('\\', '/').end_with?(suffix) }
+  raise "Expected one source path ending in #{suffix}, found #{candidates.length}" unless candidates.length == 1
+  input_index = candidates.first
+
+  asm_path = object_path.sub(/\.(?:o|obj)\z/i, '.s')
+  pre_path = object_path.sub(/\.(?:o|obj)\z/i, '.pre.s')
+  intermediates.concat([asm_path, pre_path])
+
+  compile_args = args.dup
+  compile_args[c_index] = '-S'
+  compile_args[o_index + 1] = asm_path
+  run_compiler(compile_args, groups)
+  File.rename(asm_path, pre_path)
+
+  run_command([RbConfig.ruby, POSTPROCESSOR, pre_path, asm_path])
+
+  assemble_args = args.dup
+  assemble_args[input_index] = asm_path
+  run_compiler(assemble_args, groups)
+rescue StandardError => error
+  warn "postprocess-asm-win: #{error.message}"
+  warn 'For initial Windows bring-up, configure with -DGCC_OFFLINEASM_SOURCE_MAP=OFF.'
+  exit(3)
+ensure
+  intermediates.each { |path| File.delete(path) if File.file?(path) }
+end

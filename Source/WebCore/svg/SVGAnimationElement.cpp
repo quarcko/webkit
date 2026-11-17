@@ -46,6 +46,7 @@
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/StringParsingBuffer.h>
 #include <wtf/text/StringView.h>
+#include "SVGPropertyOwnerRegistry.h"
 
 namespace WebCore {
 

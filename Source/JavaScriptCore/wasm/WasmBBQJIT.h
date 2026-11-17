@@ -1185,7 +1185,15 @@ public:
     PartialResult WARN_UNUSED_RETURN addArrayNew(uint32_t typeIndex, ExpressionType size, ExpressionType initValue, ExpressionType& result);
     PartialResult WARN_UNUSED_RETURN addArrayNewDefault(uint32_t typeIndex, ExpressionType size, ExpressionType& result);
 
+#if OS(WINDOWS) && COMPILER(GCC)
+// GCC requires the ABI attribute on the function type,
+// before creating a reference to that function type.
+    using ArraySegmentFunction = EncodedJSValue SYSV_ABI (JSC::JSWebAssemblyInstance*, uint32_t, uint32_t, uint32_t, uint32_t);
+    using ArraySegmentOperation = ArraySegmentFunction&;
+#else
     using ArraySegmentOperation = EncodedJSValue SYSV_ABI (&)(JSC::JSWebAssemblyInstance*, uint32_t, uint32_t, uint32_t, uint32_t);
+#endif
+    
     void pushArrayNewFromSegment(ArraySegmentOperation operation, uint32_t typeIndex, uint32_t segmentIndex, ExpressionType arraySize, ExpressionType offset, ExceptionType exceptionType, ExpressionType& result);
 
     PartialResult WARN_UNUSED_RETURN addArrayNewData(uint32_t typeIndex, uint32_t dataIndex, ExpressionType arraySize, ExpressionType offset, ExpressionType& result);

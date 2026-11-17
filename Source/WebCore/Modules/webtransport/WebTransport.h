@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include <wtf/ObjectIdentifier.h>
 #include "ActiveDOMObject.h"
 #include "WebTransportOptions.h"
 #include "WebTransportReliabilityMode.h"

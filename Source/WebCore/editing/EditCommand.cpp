@@ -34,6 +34,7 @@
 #include "Element.h"
 #include "HTMLTextFormControlElement.h"
 #include "NodeTraversal.h"
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

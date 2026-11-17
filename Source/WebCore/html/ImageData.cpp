@@ -33,6 +33,7 @@
 #include <JavaScriptCore/GenericTypedArrayViewInlines.h>
 #include <JavaScriptCore/JSCInlines.h>
 #include <wtf/text/TextStream.h>
+#include "ExceptionOr.h"
 
 namespace WebCore {
 

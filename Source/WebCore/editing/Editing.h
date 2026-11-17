@@ -31,6 +31,7 @@
 #include <wtf/Forward.h>
 #include <wtf/HashSet.h>
 #include <wtf/unicode/CharacterNames.h>
+#include "IntPoint.h"
 
 namespace WebCore {
 

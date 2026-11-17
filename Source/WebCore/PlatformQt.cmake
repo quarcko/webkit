@@ -504,6 +504,10 @@ elseif (WIN32)
         platform/win/SharedMemoryWin.cpp
         platform/win/SystemInfo.cpp
     )
+    list(APPEND WebCore_LIBRARIES
+        gdi32
+        user32
+    )
 else ()
     list(APPEND WebCore_SOURCES
         platform/unix/SharedMemoryUnix.cpp

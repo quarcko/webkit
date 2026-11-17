@@ -32,6 +32,7 @@
 #include "EventLoop.h"
 #include "ScriptExecutionContextInlines.h"
 #include <wtf/TZoneMallocInlines.h>
+#include "EventTargetInlines.h"
 
 namespace WebCore {
 

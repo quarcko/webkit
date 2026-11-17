@@ -67,6 +67,7 @@
 #include "markup.h"
 #include <pal/text/KillRing.h>
 #include <wtf/text/AtomString.h>
+#include "ContainerNodeInlines.h"
 
 namespace WebCore {
 

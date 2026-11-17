@@ -105,6 +105,8 @@
 #include <wtf/text/MakeString.h>
 #endif
 
+#include "ContainerNodeInlines.h"
+
 #if ENABLE(DATA_DETECTION)
 #include "DataDetection.h"
 #endif
