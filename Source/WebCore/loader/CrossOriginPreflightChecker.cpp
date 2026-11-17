@@ -98,7 +98,7 @@ void CrossOriginPreflightChecker::notifyFinished(CachedResource& resource, const
 {
     ASSERT_UNUSED(resource, &resource == m_resource);
     Ref loader = m_loader.get();
-    if (m_resource->loadFailedOrCanceled()) {
+    if (m_resource->errorOccurred() || m_resource->loadFailedOrCanceled()) {
         ResourceError preflightError = m_resource->resourceError();
         // If the preflight was cancelled by underlying code, it probably means the request was blocked due to some access control policy.
         // FIXME:: According fetch, we should just pass the error to the layer above. But this may impact some clients like XHR or EventSource.

@@ -91,7 +91,6 @@ static std::optional<CSS::EasingFunction> consumeUnresolvedStepsEasingFunction(C
             parameters.emplace(CSS::StepsEasingParameters::JumpNone { WTFMove(*stepsJumpNone) });
             break;
         }
-
         case CSSValueJumpBoth:
             parameters.emplace(CSS::StepsEasingParameters::JumpBoth { WTFMove(*steps) });
             break;
@@ -104,7 +103,9 @@ static std::optional<CSS::EasingFunction> consumeUnresolvedStepsEasingFunction(C
         default:
             return { };
         }
+    } else {
         parameters.emplace(CSS::StepsEasingParameters::End { WTFMove(*steps) });
+    }
 
     if (!args.atEnd())
         return { };
@@ -116,8 +117,8 @@ static std::optional<CSS::EasingFunction> consumeUnresolvedStepsEasingFunction(C
             .parameters = WTFMove(*parameters)
         }
     };
-    }
 }
+
 
 // MARK: - <linear()>
 
